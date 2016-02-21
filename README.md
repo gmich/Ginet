@@ -1,10 +1,16 @@
 # Ginet
 
-[![Build status](https://ci.appveyor.com/api/projects/status/4ctmsofu3ilvak50?svg=true)](https://ci.appveyor.com/project/gmich/ginet)
+[![Build status](https://ci.appveyor.com/api/projects/status/4ctmsofu3ilvak50?svg=true)](https://ci.appveyor.com/project/gmich/ginet) 
 
 A fluent networking library build on top of lidgren network.
 
 ##Quick start
+
+Ginet is available as a [NuGet package](https://www.nuget.org/packages/Ginet/). You can install it using the NuGet Package Console window:
+
+```
+PM> Install-Package Ginet -Pre
+```
 
 Ginet favors message exchange. All types that are handled via the INetworkManager must be marked with the GinetPackage attribute.
 
