@@ -1,7 +1,7 @@
 ﻿using Lidgren.Network;
 using System;
 using Ginet.Logging;
-using Ginet.Packages;
+using Ginet.NetPackages;
 using System.Threading.Tasks;
 using System.Linq;
 

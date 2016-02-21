@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Ginet.Packages;
+using Ginet.NetPackages;
 using Lidgren.Network;
 
 namespace Ginet

@@ -1,4 +1,4 @@
-﻿using Ginet.Packages;
+﻿using Ginet.NetPackages;
 
 namespace Ginet.Chat.Packages
 {

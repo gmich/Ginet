@@ -1,6 +1,6 @@
 ﻿using Ginet.Async;
 using Ginet.Logging;
-using Ginet.Packages;
+using Ginet.NetPackages;
 using Lidgren.Network;
 using System;
 using System.Threading.Tasks;

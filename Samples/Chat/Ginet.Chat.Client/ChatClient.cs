@@ -1,6 +1,6 @@
 ﻿using Ginet.Chat.Packages;
 using Ginet.Client;
-using Ginet.Packages;
+using Ginet.NetPackages;
 using Lidgren.Network;
 using System;
 using System.Reflection;
