@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ginet", "Ginet\Ginet.csproj", "{D562068D-43A2-4307-8D8C-62E5D0B19140}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{ADDB8FB2-4D0C-4E09-8EA4-A4E0BD559E18}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ginet.Chat.Client", "Samples\Chat\Ginet.Chat.Client\Ginet.Chat.Client.csproj", "{9F620C63-4409-4403-8EE3-92D79F031B66}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ginet.Chat.Server", "Samples\Chat\Ginet.Chat.Server\Ginet.Chat.Server.csproj", "{9D9E052A-206E-45D9-8F7A-013C1BC9F996}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ginet.Chat.Packages", "Samples\Chat\Ginet.Chat.Packages\Ginet.Chat.Packages.csproj", "{08BAEE58-DCDB-4CF8-8B14-A4D9E7DFAFE5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Chat", "Chat", "{50071D1E-8D39-4BBE-90E8-B774EDF1E0FE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D562068D-43A2-4307-8D8C-62E5D0B19140}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D562068D-43A2-4307-8D8C-62E5D0B19140}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D562068D-43A2-4307-8D8C-62E5D0B19140}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D562068D-43A2-4307-8D8C-62E5D0B19140}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F620C63-4409-4403-8EE3-92D79F031B66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F620C63-4409-4403-8EE3-92D79F031B66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F620C63-4409-4403-8EE3-92D79F031B66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F620C63-4409-4403-8EE3-92D79F031B66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D9E052A-206E-45D9-8F7A-013C1BC9F996}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D9E052A-206E-45D9-8F7A-013C1BC9F996}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D9E052A-206E-45D9-8F7A-013C1BC9F996}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D9E052A-206E-45D9-8F7A-013C1BC9F996}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08BAEE58-DCDB-4CF8-8B14-A4D9E7DFAFE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08BAEE58-DCDB-4CF8-8B14-A4D9E7DFAFE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08BAEE58-DCDB-4CF8-8B14-A4D9E7DFAFE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08BAEE58-DCDB-4CF8-8B14-A4D9E7DFAFE5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9F620C63-4409-4403-8EE3-92D79F031B66} = {50071D1E-8D39-4BBE-90E8-B774EDF1E0FE}
+		{9D9E052A-206E-45D9-8F7A-013C1BC9F996} = {50071D1E-8D39-4BBE-90E8-B774EDF1E0FE}
+		{08BAEE58-DCDB-4CF8-8B14-A4D9E7DFAFE5} = {50071D1E-8D39-4BBE-90E8-B774EDF1E0FE}
+		{50071D1E-8D39-4BBE-90E8-B774EDF1E0FE} = {ADDB8FB2-4D0C-4E09-8EA4-A4E0BD559E18}
+	EndGlobalSection
+EndGlobal
