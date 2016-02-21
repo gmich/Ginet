@@ -38,7 +38,7 @@ namespace Ginet.Chat.Client
             Client
             .IncomingMessageHandler
             .OnPackage<ServerNotification>((msg, sender) => 
-                Console.WriteLine($"[Server]: {msg.Message}"));
+                Console.WriteLine($"[Server]: {msg.Message }"));
 
             Sender = Client.LiftSender((msg, peer) =>
               peer.SendMessage(msg, NetDeliveryMethod.ReliableOrdered));

@@ -51,24 +51,24 @@
     <Compile Include="Async\ParallelTask.cs" />
     <Compile Include="Client\NetworkClient.cs" />
     <Compile Include="Logging\GinetOut.cs" />
-    <Compile Include="Packages\PackageSenderLift.cs" />
-    <Compile Include="Packages\IPackageSender.cs" />
-    <Compile Include="Packages\PackageConfigurator.cs" />
     <Compile Include="Logging\ActionAppender.cs" />
     <Compile Include="Logging\AppenderOptions.cs" />
     <Compile Include="Logging\ConfigurableAppender.cs" />
     <Compile Include="Logging\IAppender.cs" />
     <Compile Include="Logging\IConfigurableAppender.cs" />
-    <Compile Include="Packages\GinetPackageAttribute.cs" />
-    <Compile Include="Packages\PackageSerializerAttribute.cs" />
     <Compile Include="Packages\DefaultSerializer.cs" />
-    <Compile Include="Packages\PackageInfo.cs" />
+    <Compile Include="Packages\GinetPackageAttribute.cs" />
+    <Compile Include="Packages\IncomingMessageHandler.cs" />
+    <Compile Include="Packages\IPackageSender.cs" />
     <Compile Include="Packages\IPackageSerializer.cs" />
+    <Compile Include="Packages\PackageConfigurator.cs" />
+    <Compile Include="Packages\PackageInfo.cs" />
+    <Compile Include="Packages\PackageSenderLift.cs" />
+    <Compile Include="Packages\PackageSerializerAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\ConcurrentRepository.cs" />
     <Compile Include="INetworkManager.cs" />
     <Compile Include="NetworkManager.cs" />
-    <Compile Include="Packages\IncomingMessageHandler.cs" />
     <Compile Include="Server\NetworkServer.cs" />
   </ItemGroup>
   <ItemGroup>
