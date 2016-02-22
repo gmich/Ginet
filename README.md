@@ -2,7 +2,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/4ctmsofu3ilvak50?svg=true)](https://ci.appveyor.com/project/gmich/ginet) 
 
-A fluent networking library build on top of lidgren network.
+A fluent networking library build on top of [lidgren network](https://github.com/lidgren/lidgren-network-gen3). Ginet extends lidgren network with a fluent and functional API.
 
 ##Quick start
 
@@ -49,7 +49,7 @@ Register the classes that are marked with the GinetPackage attribute
           server.PackageConfigurator.RegisterPackages(Assembly.Load("Packages.Assembly.Name"));
 ```
 
-Configure package handling
+Configure how to respond to incoming packages.
 
 ```          
           server.RespondTo<ChatMessage>((msg, im, om) =>
@@ -63,11 +63,38 @@ Configure package handling
 Configure context specific behavior 
 
 ```
-        server.IncomingMessageHandler.OnMessage(NetIncomingMessageType.ConnectionApproval, im =>
+        server.IncomingMessageHandler.OnMessage(NetIncomingMessageType.ConnectionApproval, incomingMsg =>
         {
            //Configure connection approval
-           im.SenderConnection.Approve();
+           incomingMsg.SenderConnection.Approve();
         });
+```
+
+```
+         server.IncomingMessageHandler.OnConnectionChange(NetConnectionStatus.Disconnected, incomingMsg =>
+         {
+                 server.SendToAllExcept(
+                     server.ConvertToOutgoingMessage(new MyPackage
+                     { Message = $"Disconnected {incomingMsg.SenderConnection}" }),
+                     im.SenderConnection,
+                     NetDeliveryMethod.ReliableOrdered,
+                     channel: 0);
+          });
+```        
+
+```
+         server.IncomingMessageHandler.OnConnection(server.Host.Connections.First(), (msgType, incomingMsg) =>
+         {
+                 //...
+         });
+```    
+
+Upon adding a handler, an IDisposable object is returned. Disposing it causes the handler deregistration.
+
+```
+        var handlerDisposable = server.IncomingMessageHandler.OnMessage(NetIncomingMessageType.Data, im => { });
+        
+        handlerDisposable.Dispose();
 ```
 
 ----
@@ -112,10 +139,10 @@ Send a message
 Create a message sender lifter
 
 ```
-       var lifter = client.LiftSender((msg, peer) =>
+       IPackageSender packageSender = client.LiftSender((msg, peer) =>
               peer.SendMessage(msg, NetDeliveryMethod.ReliableOrdered));
               
-       lifter.Send(new MyPackage { Message = "Hello" });
+       packageSender.Send(new MyPackage { Message = "Hello" });
 ```
 
 ---
