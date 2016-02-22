@@ -42,7 +42,11 @@ namespace Ginet
                 config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
             }
             Host = (TNetPeer)Activator.CreateInstance(typeof(TNetPeer), new object[] { config });
-            IncomingMessageHandler = new IncomingMessageHandler(id => PackageConfigurator[id]);
+            IncomingMessageHandler = new IncomingMessageHandler(id =>           
+                new Tuple<PackageInfo, IDisposable>(
+                    PackageConfigurator[id],
+                    PackageConfigurator.Packages.CreateDisposable(id))
+            );
         }
 
         public IPackageSender LiftSender(Action<NetOutgoingMessage, TNetPeer> sender)

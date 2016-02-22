@@ -22,9 +22,9 @@ namespace Ginet.NetPackages
         private readonly ConcurrentRepository<NetConnection, Func<NetIncomingMessageType, NetIncomingMessage, Task>> connectionHandler =
             new ConcurrentRepository<NetConnection, Func<NetIncomingMessageType, NetIncomingMessage, Task>>();
 
-        private readonly Func<string, PackageInfo> packageRetriever;
+        private readonly Func<string, Tuple<PackageInfo, IDisposable>> packageRetriever;
 
-        internal IncomingMessageHandler(Func<string, PackageInfo> packageRetriever)
+        internal IncomingMessageHandler(Func<string, Tuple<PackageInfo, IDisposable>> packageRetriever)
         {
             appender = GinetOut.Appender[GetType().FullName];
             this.packageRetriever = packageRetriever;
@@ -40,7 +40,7 @@ namespace Ginet.NetPackages
 
             messageHandlers.Add(NetIncomingMessageType.Data, async im =>
             {
-                var package = packageRetriever(im.ReadString());
+                var package = packageRetriever(im.ReadString()).Item1;
                 if (package != null)
                 {
                     var message = package.Serializer.Decode(im, package.Type);
@@ -69,22 +69,24 @@ namespace Ginet.NetPackages
             }
         }
 
-        public void OnPackage<TPackage>(Action<TPackage, NetIncomingMessage> handler)
+        public IDisposable OnPackage<TPackage>(Action<TPackage, NetIncomingMessage> handler)
             where TPackage : class
         {
             var entry = packageRetriever(typeof(TPackage).FullName);
-            entry.Handler = (obj, im) =>
+            entry.Item1.Handler = (obj, im) =>
             {
                 handler((TPackage)obj, im);
                 return Task.FromResult(0);
             };
+            return entry.Item2;
         }
 
-        public void Handle<TPackage>(Func<TPackage, NetIncomingMessage, Task> handler)
+        public IDisposable Handle<TPackage>(Func<TPackage, NetIncomingMessage, Task> handler)
             where TPackage : class
         {
             var entry = packageRetriever(typeof(TPackage).FullName);
-            entry.Handler = (obj, im) => handler((TPackage)obj, im);
+            entry.Item1.Handler = (obj, im) => handler((TPackage)obj, im);
+            return entry.Item2;
         }
 
         public IDisposable OnMessage(NetIncomingMessageType type, Func<NetIncomingMessage, Task> handler)
@@ -116,7 +118,7 @@ namespace Ginet.NetPackages
             });
         }
 
-        public IDisposable OnConnectionChange(NetConnectionStatus type, Action<NetIncomingMessage> handler)
+        public IDisposable OnConnection(NetConnectionStatus type, Action<NetIncomingMessage> handler)
         {
             return connectionChange.Add(type, im =>
             {
@@ -134,7 +136,7 @@ namespace Ginet.NetPackages
             });
         }
 
-        public IDisposable OnSpecificConnection(NetConnection connection, Action<NetIncomingMessageType, NetIncomingMessage> handler)
+        public IDisposable OnConnection(NetConnection connection, Action<NetIncomingMessageType, NetIncomingMessage> handler)
         {
             return connectionHandler.Add(connection, (msgType, im) =>
             {
@@ -180,6 +182,10 @@ namespace Ginet.NetPackages
 
                 while ((im = peer.ReadMessage()) != null)
                 {
+                    if (connectionHandler.HasKey(im.SenderConnection))
+                    {
+                        await connectionHandler[im.SenderConnection].Invoke(im.MessageType, im);
+                    }
                     foreach (var handler in globalHandler.GetAll)
                     {
                         await handler(im.MessageType, im);

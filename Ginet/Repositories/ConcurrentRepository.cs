@@ -74,7 +74,21 @@ namespace Ginet.Repositories
                 items.TryAdd(id, item);
                 return new DeregisterDictionary<Tid, Titem>(items, item);
             }
-            return null;
+            return new DoNothingDisposable();
+        }
+
+        public IDisposable CreateDisposable(Tid id)
+        {
+            if (items.ContainsKey(id))
+            {
+                return new DeregisterDictionary<Tid, Titem>(items, items[id]);
+            }
+            throw new Exception("Id was not found");
+        }
+
+        private class DoNothingDisposable : IDisposable
+        {
+            public void Dispose(){}
         }
 
         private class DeregisterDictionary<TKey, TValue> : IDisposable

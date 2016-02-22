@@ -19,7 +19,7 @@ namespace Ginet.Chat.Server
             });
             server.IncomingMessageHandler.LogTraffic();
             server.PackageConfigurator.RegisterPackages(Assembly.Load("Ginet.Chat.Packages"));
-            server.IncomingMessageHandler.OnConnectionChange(NetConnectionStatus.Disconnected, im =>
+            server.IncomingMessageHandler.OnConnection(NetConnectionStatus.Disconnected, im =>
              {
                  server.Out.Info($"Disconnected {im.SenderConnection}");
                  server.SendToAllExcept(
@@ -46,6 +46,7 @@ namespace Ginet.Chat.Server
 
         private void ConfigureConnectionApproval()
         {
+            
             server.IncomingMessageHandler.OnMessage(NetIncomingMessageType.ConnectionApproval, im =>
             {
                 var msg = server.ReadAs<ConnectionApprovalMessage>(im);
