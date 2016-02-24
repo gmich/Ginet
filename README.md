@@ -12,7 +12,7 @@ Ginet is available as a [NuGet package](https://www.nuget.org/packages/Ginet/). 
 PM> Install-Package Ginet -Pre
 ```
 
-Ginet favors message exchange. All types that are handled via the INetworkManager must be marked with the GinetPackage attribute.
+Ginet favors message exchange. All classes that are handled via the `INetworkManage`r must be marked with the `GinetPackageAttribute`. The classes must be marked as public with public getter / setters and contain only primitive types. For complex serialization you can provide your custom serializer via attribute (more info bellow). 
 
 ```
           [GinetPackage]
@@ -31,7 +31,7 @@ Ginet favors message exchange. All types that are handled via the INetworkManage
 
 ###Server
 
-Create and configure
+Create configure
 
 ```
           var server = new NetworkServer("MyServer", cfg =>
@@ -45,17 +45,49 @@ Create and configure
 
 Register the classes that are marked with the GinetPackage attribute
 
+Manually
+
+```
+          server.PackageConfigurator.RegisterPackage<MyPackage>();
+```
+
+With reflection
 ```
           server.PackageConfigurator.RegisterPackages(Assembly.Load("Packages.Assembly.Name"));
 ```
 
-Configure how to respond to incoming packages.
+Start the server
+
+``` 
+          server.Start(NetDeliveryMethod.ReliableOrdered, channel: 0);
+```
+
+Process Incoming Messages in a separate thread
+
+```
+          server.ProcessMessagesInBackground();           
+```
+
+If you have an update loop you can await the message processing in an async method
+
+```
+        await server.ProcessMessages()
+```
+
+Configure how to respond to incoming packages
 
 ```          
-          server.RespondTo<ChatMessage>((msg, im, om) =>
+          server.Broadcast<ChatMessage>((msg, im, om) =>
           {
               server.Out.Info($"Received {msg.Message}");
               server.SendToAllExcept(om, im.SenderConnection, NetDeliveryMethod.ReliableOrdered, channel: 0);
+          }, 
+          packageTransformer: msg => 
+              msg.Message += "this is broadcasted");
+          
+          server.BroadcastExceptSender<ChatMessage>((sender, msg) =>
+          {
+              server.Out.Info($"Broadcasting {msg.Message}. Received from: {sender}");
           });
 
 ```
@@ -66,7 +98,16 @@ Configure context specific behavior
         server.IncomingMessageHandler.OnMessage(NetIncomingMessageType.ConnectionApproval, incomingMsg =>
         {
            //Configure connection approval
-           incomingMsg.SenderConnection.Approve();
+           var parsedMsg = server.ReadAs<ConnectionApprovalMessage>(incomingMsg);
+           if(parsedMsg.Password == "my secret and encrypted password")
+           {
+                incomingMsg.SenderConnection.Approve();
+                incomingMsg.SenderConnection.Tag = parsedMsg.Sender;
+           }
+           else
+           {
+                incomingMsg.SenderConnection.Deny();
+           }
         });
 ```
 
@@ -89,7 +130,7 @@ Configure context specific behavior
          });
 ```    
 
-Upon adding a handler, an IDisposable object is returned. Disposing it causes the handler deregistration.
+Upon adding a handler, an `IDisposable` object is returned. Disposing it causes the handler deregistration.
 
 ```
         var handlerDisposable = server.IncomingMessageHandler.OnMessage(NetIncomingMessageType.Data, im => { });
@@ -111,14 +152,21 @@ Create and configure
          client.PackageConfigurator.RegisterPackages(Assembly.Load("Ginet.Chat.Packages"));
 ```
 
-Connect
+Start / Connect
 
 ```
+         client.Start(NetDeliveryMethod.ReliableOrdered, channel: 0);
          client.Connect("localhost", 1234, new ConnectionApprovalMessage
          {
              Sender = "Me",
              Password = "1234"
          });
+```
+
+Process Incoming messages
+
+```
+         client.ProcessMessagesInBackground();           
 ```
 
 Handle incoming messages
@@ -132,8 +180,8 @@ Handle incoming messages
 Send a message
 
 ```
-      client.Send(new MyPackage { Message = "Hello" },
-                 (om,peer) => peer.SendMessage(om,NetDeliveryMethod.ReliableOrdered));
+       client.Send(new MyPackage { Message = "Hello" },
+                  (om,peer) => peer.SendMessage(om,NetDeliveryMethod.ReliableOrdered));
 ``` 
                  
 Create a message sender lifter
@@ -149,7 +197,7 @@ Create a message sender lifter
 
 ###Logging
 
-For custom logging targets implement the IAppender interface and pass it in the client , server creation
+For custom logging targets implement the `IAppender` interface and pass it in the client , server creation
 
 ```
           var server = new NetworkServer(
@@ -158,7 +206,7 @@ For custom logging targets implement the IAppender interface and pass it in the 
           output: new MyAppenderImplementation());
 ```
 
-The default IAppender is the Console.WriteLine ActionAppender
+The default `IAppender` uses the `Console.WriteLine` in the `ActionAppender` constructor.
 
 ```
           var server = new NetworkServer(
@@ -171,7 +219,7 @@ The default IAppender is the Console.WriteLine ActionAppender
 
 ###Custom serializers
 
-For custom encoding / decoding for a type, simply implement the IPackageSerializer interface add the PackageSerializerAttribute to the class
+For custom encoding / decoding for a type, simply implement the `IPackageSerializer` interface add the `PackageSerializerAttribute` to the class
 
 ```
        [GinetPackage]
