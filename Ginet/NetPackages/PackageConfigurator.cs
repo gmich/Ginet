@@ -1,5 +1,5 @@
 ﻿using Ginet.Logging;
-using Ginet.Repositories;
+using Ginet.Infrastructure;
 using Lidgren.Network;
 using System;
 using System.Diagnostics.Contracts;

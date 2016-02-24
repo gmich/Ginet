@@ -1,5 +1,4 @@
 ﻿using Ginet.Chat.Packages;
-using Ginet.Server;
 using Lidgren.Network;
 using System.Reflection;
 
@@ -19,51 +18,46 @@ namespace Ginet.Chat.Server
             });
             server.IncomingMessageHandler.LogTraffic();
             server.PackageConfigurator.RegisterPackages(Assembly.Load("Ginet.Chat.Packages"));
-            server.IncomingMessageHandler.OnConnection(NetConnectionStatus.Disconnected, im =>
-             {
-                 server.Out.Info($"Disconnected {im.SenderConnection}");
-                 server.SendToAllExcept(
-                     server.ConvertToOutgoingMessage(
-                         new ServerNotification { Message = $"Disconnected {im.SenderConnection}" }),
-                     im.SenderConnection,
-                     NetDeliveryMethod.ReliableOrdered,
-                     0);
-             });
+            server.Start(NetDeliveryMethod.ReliableOrdered, 0);
+
+            server.IncomingMessageHandler.OnConnectionChange(NetConnectionStatus.Disconnected, im =>             
+                 server
+                 .SendToAllExcept(new ServerNotification
+                 {
+                     Message = $"Disconnected {im.SenderEndPoint}"
+                 },
+                 im.SenderConnection)
+             );
 
             ConfigureConnectionApproval();
-            ConfigureResponseDispatch();
-
+            ConfigureResponses();
         }
 
-        private void ConfigureResponseDispatch()
+        private void ConfigureResponses()
         {
-            server.RespondTo<ChatMessage>((msg, im, om) =>
-            {
-                server.Out.Info($"Received {msg.Message}");
-                server.SendToAllExcept(om, im.SenderConnection, NetDeliveryMethod.ReliableOrdered, 0);
-            });
+            server.BroadcastExceptSender<ChatMessage>((sender,msg) =>            
+                server.Out.Info($"Received {msg.Message} from {sender}")
+            );
         }
 
         private void ConfigureConnectionApproval()
-        {
-            
+        {            
             server.IncomingMessageHandler.OnMessage(NetIncomingMessageType.ConnectionApproval, im =>
             {
                 var msg = server.ReadAs<ConnectionApprovalMessage>(im);
                 if (msg.Password == password)
                 {
                     im.SenderConnection.Approve();
-                    server.Out.Info($"Approved {msg.Sender} : {im.SenderConnection}");
+                    server.Out.Info($"Approved {msg.Sender} with Endpoint: {im.SenderEndPoint}");
+                    im.SenderConnection.Tag = msg.Sender;
                     server.SendToAllExcept(server.ConvertToOutgoingMessage(
                         new ServerNotification { Message = $"Say welcome to {msg.Sender}" }),
-                        im.SenderConnection,
-                        NetDeliveryMethod.ReliableOrdered,
-                        0);
+                        im.SenderConnection);
                 }
                 else
                 {
                     im.SenderConnection.Deny();
-                    server.Out.Info($"Denied {msg.Sender} : {im.SenderConnection}");
+                    server.Out.Info($"Denied {msg.Sender} : {im.SenderEndPoint}");
                 }
             });
         }
@@ -71,12 +65,12 @@ namespace Ginet.Chat.Server
         public void Start()
         {
             server.Host.Start();
-            server.ProcessMessagesInBackground();
+            server.ProcessMessagesInBackground();            
         }
 
         public void Stop()
         {
-            server.Stop("bb");
+            server.Stop("bye");
         }
     }
 }

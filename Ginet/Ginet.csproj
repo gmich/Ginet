@@ -48,8 +48,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Async\ParallelTask.cs" />
-    <Compile Include="Client\NetworkClient.cs" />
+    <Compile Include="Infrastructure\ParallelTaskStarter.cs" />
+    <Compile Include="NetworkClient.cs" />
     <Compile Include="Logging\GinetOut.cs" />
     <Compile Include="Logging\ActionAppender.cs" />
     <Compile Include="Logging\AppenderOptions.cs" />
@@ -66,10 +66,10 @@
     <Compile Include="NetPackages\PackageSenderLift.cs" />
     <Compile Include="NetPackages\PackageSerializerAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Repositories\ConcurrentRepository.cs" />
+    <Compile Include="Infrastructure\ConcurrentRepository.cs" />
     <Compile Include="INetworkManager.cs" />
     <Compile Include="NetworkManager.cs" />
-    <Compile Include="Server\NetworkServer.cs" />
+    <Compile Include="NetworkServer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

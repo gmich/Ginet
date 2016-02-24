@@ -1,5 +1,4 @@
-﻿using Ginet.Server;
-using Lidgren.Network;
+﻿using Lidgren.Network;
 using System;
 
 namespace Ginet.NetPackages

@@ -1,7 +1,8 @@
 ﻿using Ginet.Logging;
-using Ginet.Repositories;
+using Ginet.Infrastructure;
 using Lidgren.Network;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Ginet.NetPackages
@@ -22,9 +23,11 @@ namespace Ginet.NetPackages
         private readonly ConcurrentRepository<NetConnection, Func<NetIncomingMessageType, NetIncomingMessage, Task>> connectionHandler =
             new ConcurrentRepository<NetConnection, Func<NetIncomingMessageType, NetIncomingMessage, Task>>();
 
-        private readonly Func<string, Tuple<PackageInfo, IDisposable>> packageRetriever;
+        private readonly Func<string, Tuple<PackageInfo, Func<IDisposable>>> packageRetriever;
+        private string SenderInfo(NetIncomingMessage im) =>
+            $"{im.SenderEndPoint?.ToString()} - {im.SenderConnection?.Tag?.ToString()}";
 
-        internal IncomingMessageHandler(Func<string, Tuple<PackageInfo, IDisposable>> packageRetriever)
+        internal IncomingMessageHandler(Func<string, Tuple<PackageInfo, Func<IDisposable>>> packageRetriever)
         {
             appender = GinetOut.Appender[GetType().FullName];
             this.packageRetriever = packageRetriever;
@@ -49,24 +52,6 @@ namespace Ginet.NetPackages
                 }
             });
 
-            Log(new[] {
-                NetIncomingMessageType.WarningMessage,
-                NetIncomingMessageType.ErrorMessage,
-                NetIncomingMessageType.Error,
-                NetIncomingMessageType.DebugMessage,
-                NetIncomingMessageType.VerboseDebugMessage
-            });
-        }
-
-        private void Log(NetIncomingMessageType[] msgTypes)
-        {
-            foreach (var msgType in msgTypes)
-            {
-                messageHandlers.Add(
-                    msgType,
-                    msg => Task.Run(() =>
-                        appender.Debug(msg.ReadString())));
-            }
         }
 
         public IDisposable OnPackage<TPackage>(Action<TPackage, NetIncomingMessage> handler)
@@ -78,15 +63,15 @@ namespace Ginet.NetPackages
                 handler((TPackage)obj, im);
                 return Task.FromResult(0);
             };
-            return entry.Item2;
+            return entry.Item2();
         }
 
-        public IDisposable Handle<TPackage>(Func<TPackage, NetIncomingMessage, Task> handler)
+        public IDisposable OnPackage<TPackage>(Func<TPackage, NetIncomingMessage, Task> handler)
             where TPackage : class
         {
             var entry = packageRetriever(typeof(TPackage).FullName);
             entry.Item1.Handler = (obj, im) => handler((TPackage)obj, im);
-            return entry.Item2;
+            return entry.Item2();
         }
 
         public IDisposable OnMessage(NetIncomingMessageType type, Func<NetIncomingMessage, Task> handler)
@@ -104,7 +89,7 @@ namespace Ginet.NetPackages
             return globalHandler.Add(connectionHandler.Count + 1, handler);
         }
 
-        public IDisposable OnSpecificConnection(NetConnection connection, Func<NetIncomingMessageType, NetIncomingMessage, Task> handler)
+        public IDisposable OnConnection(NetConnection connection, Func<NetIncomingMessageType, NetIncomingMessage, Task> handler)
         {
             return connectionHandler.Add(connection, handler);
         }
@@ -118,7 +103,7 @@ namespace Ginet.NetPackages
             });
         }
 
-        public IDisposable OnConnection(NetConnectionStatus type, Action<NetIncomingMessage> handler)
+        public IDisposable OnConnectionChange(NetConnectionStatus type, Action<NetIncomingMessage> handler)
         {
             return connectionChange.Add(type, im =>
             {
@@ -147,9 +132,18 @@ namespace Ginet.NetPackages
 
         public void LogTraffic()
         {
+            LogMessageType(new Dictionary<NetIncomingMessageType, Action<string>>
+            {
+                [NetIncomingMessageType.WarningMessage] = appender.Warn,
+                [NetIncomingMessageType.ErrorMessage] = appender.Error,
+                [NetIncomingMessageType.Error] = appender.Error,
+                [NetIncomingMessageType.DebugMessage] = appender.Debug,
+                [NetIncomingMessageType.VerboseDebugMessage] = appender.Debug
+            });
+
             globalHandler.Add(connectionHandler.Count + 1,
                 (msgType, msg) => Task.Run(() =>
-                    appender.Info($"{msgType} from {msg.SenderConnection}")));
+                    appender.Info($"{msgType} - {SenderInfo(msg)}")));
 
             LogConnectionChange(new[]
             {
@@ -164,12 +158,23 @@ namespace Ginet.NetPackages
             });
         }
 
+        private void LogMessageType(IDictionary<NetIncomingMessageType, Action<string>> msgTypeAndLogger)
+        {
+            foreach (var typeAndLogger in msgTypeAndLogger)
+            {
+                messageHandlers.Add(
+                    typeAndLogger.Key,
+                    msg => Task.Run(() =>
+                        typeAndLogger.Value($"{msg.ReadString()} - {SenderInfo(msg)}.")));
+            }
+        }
+
         private void LogConnectionChange(NetConnectionStatus[] netStatus)
         {
             foreach (var status in netStatus)
             {
                 connectionChange.Add(status, msg => Task.Run(() =>
-                appender.Info($"Status Changed: {status} from {msg.SenderConnection}")));
+                appender.Info($"Status Changed: {status} - {SenderInfo(msg)}")));
             }
         }
 
@@ -182,9 +187,12 @@ namespace Ginet.NetPackages
 
                 while ((im = peer.ReadMessage()) != null)
                 {
-                    if (connectionHandler.HasKey(im.SenderConnection))
+                    if (im.SenderConnection != null)
                     {
-                        await connectionHandler[im.SenderConnection].Invoke(im.MessageType, im);
+                        if (connectionHandler.HasKey(im.SenderConnection))
+                        {
+                            await connectionHandler[im.SenderConnection].Invoke(im.MessageType, im);
+                        }
                     }
                     foreach (var handler in globalHandler.GetAll)
                     {

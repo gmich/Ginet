@@ -8,6 +8,8 @@ namespace Ginet
     public interface INetworkManager<TPeer> 
         where TPeer : NetPeer
     {
+        int Channel { get; set; }
+        NetDeliveryMethod DeliveryMethod { get; set; }
         IncomingMessageHandler IncomingMessageHandler { get; }
         PackageConfigurator PackageConfigurator { get; }
         TPeer Host { get; }
@@ -17,6 +19,7 @@ namespace Ginet
         Task ProcessMessages();
         void ProcessMessagesInBackground();
         void Send<TMessage>(TMessage message, Action<NetOutgoingMessage, TPeer> sender) where TMessage : class;
+        void Start(NetDeliveryMethod deliveryMethod, int channel);
         void Stop(string disconnectMsg);
     }
 }

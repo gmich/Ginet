@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
-namespace Ginet.Repositories
+namespace Ginet.Infrastructure
 {
     internal class ConcurrentRepository<Tid, Titem>
         where Titem : class
@@ -18,6 +18,7 @@ namespace Ginet.Repositories
 
         public int Count => items.Count;
         public bool HasKey(Tid key) => items.ContainsKey(key);
+
         public IEnumerable<Titem> GetAll => items.Select(x => x.Value);
 
         public Titem GetById(Tid id)
@@ -26,7 +27,7 @@ namespace Ginet.Repositories
             {
                 return items[id];
             }
-            return null;
+            throw new Exception($"Key {id} was not found");
         }
 
         public void IfExists(Tid id, Action<Titem> action)

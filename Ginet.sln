@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ginet.Chat.Packages", "Samp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Chat", "Chat", "{50071D1E-8D39-4BBE-90E8-B774EDF1E0FE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ginet.Tests", "Ginet.Tests\Ginet.Tests.csproj", "{4956B288-2931-4E6F-BBCB-4F8C30B66CF0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,10 @@ Global
 		{08BAEE58-DCDB-4CF8-8B14-A4D9E7DFAFE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08BAEE58-DCDB-4CF8-8B14-A4D9E7DFAFE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08BAEE58-DCDB-4CF8-8B14-A4D9E7DFAFE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4956B288-2931-4E6F-BBCB-4F8C30B66CF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4956B288-2931-4E6F-BBCB-4F8C30B66CF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4956B288-2931-4E6F-BBCB-4F8C30B66CF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4956B288-2931-4E6F-BBCB-4F8C30B66CF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

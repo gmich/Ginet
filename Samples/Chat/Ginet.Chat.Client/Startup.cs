@@ -4,18 +4,22 @@ using System;
 
 namespace Ginet.Chat.Client
 {
-    internal class Program
+    internal class Startup
     {
         static void Main(string[] args)
         {
-            var chatClient = new ChatClient();
+            Console.WriteLine("Username: ");
+            var chatClient = new ChatClient(Console.ReadLine());
             string input;
 
             while((input = Console.ReadLine()) != "quit")
             {
-                chatClient.Sender.Send(new ChatMessage { Message = input });
+                chatClient.Sender.Send(new ChatMessage
+                {
+                    Sender = chatClient.UserName,
+                    Message = input
+                });
             }
-
             chatClient.Client.Stop("bb");
         }
     }

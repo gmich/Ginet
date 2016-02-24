@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
-namespace Ginet.Async
+namespace Ginet.Infrastructure
 {
     internal sealed class ParallelTaskStarter : IDisposable
     {

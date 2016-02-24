@@ -1,5 +1,4 @@
 ﻿using Ginet.Chat.Packages;
-using Ginet.Client;
 using Ginet.NetPackages;
 using Lidgren.Network;
 using System;
@@ -13,31 +12,36 @@ namespace Ginet.Chat.Client
 
         public IPackageSender Sender { get; }
 
-        public ChatClient()
+        public string UserName { get; }
+        public ChatClient(string userName)
         {
+            UserName = userName;
             Client = new NetworkClient("Chat", cfg =>
             { });
-
-#if DEBUG
             //Client.IncomingMessageHandler.LogTraffic();
-#endif
             Client.PackageConfigurator.RegisterPackages(Assembly.Load("Ginet.Chat.Packages"));
+            Client.Start(NetDeliveryMethod.UnreliableSequenced, 0);
 
             Client.Connect("localhost", 1234, new ConnectionApprovalMessage
             {
-                Sender = "Me",
+                Sender = userName,
                 Password = "1234"
             });
             Client.ProcessMessagesInBackground();
 
             Client
             .IncomingMessageHandler
-            .OnPackage<ChatMessage>((msg, sender) => 
-                Console.WriteLine(msg.Message));
+            .OnConnectionChange(NetConnectionStatus.Connected, im =>
+                 Console.WriteLine($"Connected to {im.SenderEndPoint}"));
 
             Client
             .IncomingMessageHandler
-            .OnPackage<ServerNotification>((msg, sender) => 
+            .OnPackage<ChatMessage>((msg, sender) =>
+                Console.WriteLine($"[{msg.Sender}]: {msg.Message}"));
+
+            Client
+            .IncomingMessageHandler
+            .OnPackage<ServerNotification>((msg, sender) =>
                 Console.WriteLine($"[Server]: {msg.Message }"));
 
             Sender = Client.LiftSender((msg, peer) =>
