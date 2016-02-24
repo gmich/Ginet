@@ -12,7 +12,7 @@ Ginet is available as a [NuGet package](https://www.nuget.org/packages/Ginet/). 
 PM> Install-Package Ginet -Pre
 ```
 
-Ginet favors message exchange. All classes that are handled via the `INetworkManage`r must be marked with the `GinetPackageAttribute`. The classes must be marked as public with public getter / setters and contain only primitive types. For complex serialization you can provide your custom serializer via attribute (more info bellow). 
+Ginet favors message exchange. All classes that are handled via the `INetworkManager` must be marked with the `GinetPackageAttribute`. The classes must be marked as public with public getters / setters and contain only primitive types. For complex serialization you can provide your [custom serializer](https://github.com/gmich/Ginet/blob/master/README.md#custom-serializers) via attribute.
 
 ```
           [GinetPackage]
