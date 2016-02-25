@@ -1,6 +1,4 @@
-﻿using Ginet.Chat.Packages;
-using Lidgren.Network;
-using System;
+﻿using System;
 
 namespace Ginet.Chat.Client
 {
@@ -8,19 +6,17 @@ namespace Ginet.Chat.Client
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Username: ");
-            var chatClient = new ChatClient(Console.ReadLine());
-            string input;
+            var clientManager = new ClientManager(cfg=> { });
+            var chatter = new Chatter(clientManager.DefaultPackageSender,clientManager.MessageHandler);
+            clientManager.ConnectClient(chatter.ConnectionApprovalMessage);
 
+            string input;
             while((input = Console.ReadLine()) != "quit")
             {
-                chatClient.Sender.Send(new ChatMessage
-                {
-                    Sender = chatClient.UserName,
-                    Message = input
-                });
+                chatter.SendChatMessage(input);
             }
-            chatClient.Client.Stop("bb");
+
+            clientManager.Disconnect();
         }
     }
 }
