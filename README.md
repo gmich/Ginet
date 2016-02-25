@@ -31,30 +31,25 @@ Ginet favors message exchange. All classes that are handled via the `INetworkMan
 
 ###Server
 
-Create configure
+Create, configure and register the classes that are marked with the GinetPackage attribute
 
 ```
-          var server = new NetworkServer("MyServer", cfg =>
-          {
-             cfg.Port = 1234;
-             cfg.ConnectionTimeout = 5.0f;
-             //Additional configuration
-          });
+          var server = new NetworkServer("MyServer",
+                    container=>
+                    {
+                        //via reflection
+                        container.RegisterPackages(Assembly.Load("Packages.Assembly.Name"));
+                        //or manually
+                        container.RegisterPackage<MyPackage>();
+                    }
+                    cfg =>
+                    {
+                       cfg.Port = 1234;
+                       cfg.ConnectionTimeout = 5.0f;
+                       //Additional configuration
+                    });
           server.IncomingMessageHandler.LogTraffic();
 ```        
-
-Register the classes that are marked with the GinetPackage attribute
-
-Manually
-
-```
-          server.PackageConfigurator.RegisterPackage<MyPackage>();
-```
-
-With reflection
-```
-          server.PackageConfigurator.RegisterPackages(Assembly.Load("Packages.Assembly.Name"));
-```
 
 Start the server
 
@@ -142,14 +137,16 @@ Upon adding a handler, an `IDisposable` object is returned. Disposing it causes 
 
 ###Client
 
-Create and configure
+Create, configure and register the classes that are marked with the GinetPackage attribute
 
 ```
-         var client = new NetworkClient("Chat", cfg =>
-         {  
-            //client configuration
-         });
-         client.PackageConfigurator.RegisterPackages(Assembly.Load("Ginet.Chat.Packages"));
+         var client = new NetworkClient("Chat", 
+                   container=>
+                        container.RegisterPackages(Assembly.Load("Packages.Assembly.Name"));
+                   cfg =>
+                   {  
+                      //client configuration
+                   });
 ```
 
 Start / Connect
