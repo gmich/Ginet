@@ -24,38 +24,38 @@ namespace Ginet
 
         public NetworkManager(string name, Action<GinetConfig> configuration, Action<PackageContainerBuilder> containerBuilder)
         {
-            var config = new GinetConfig
+            Configuration = new GinetConfig
             {
                 NetConfig = new NetPeerConfiguration(name)
             };
-            if (config.Output != null)
+            if (Configuration.Output != null)
             {
                 GinetOut.Appender = Out;
             }
-            configuration(config);
+            configuration(Configuration);
 
             Out = GinetOut.Appender[GetType().FullName];
             var builder = new PackageContainerBuilder();
             containerBuilder(builder);
 
-            if (config.EnableAllIncomingMessages)
+            if (Configuration.EnableAllIncomingMessages)
             {
-                config.NetConfig.EnableMessageType(NetIncomingMessageType.Data);
-                config.NetConfig.EnableMessageType(NetIncomingMessageType.NatIntroductionSuccess);
-                config.NetConfig.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
-                config.NetConfig.EnableMessageType(NetIncomingMessageType.Receipt);
-                config.NetConfig.EnableMessageType(NetIncomingMessageType.StatusChanged);
-                config.NetConfig.EnableMessageType(NetIncomingMessageType.UnconnectedData);
-                config.NetConfig.EnableMessageType(NetIncomingMessageType.WarningMessage);
-                config.NetConfig.EnableMessageType(NetIncomingMessageType.VerboseDebugMessage);
-                config.NetConfig.EnableMessageType(NetIncomingMessageType.ErrorMessage);
-                config.NetConfig.EnableMessageType(NetIncomingMessageType.Error);
-                config.NetConfig.EnableMessageType(NetIncomingMessageType.DebugMessage);
-                config.NetConfig.EnableMessageType(NetIncomingMessageType.ConnectionApproval);
-                config.NetConfig.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
+                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.Data);
+                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.NatIntroductionSuccess);
+                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
+                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.Receipt);
+                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.StatusChanged);
+                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.UnconnectedData);
+                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.WarningMessage);
+                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.VerboseDebugMessage);
+                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.ErrorMessage);
+                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.Error);
+                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.DebugMessage);
+                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.ConnectionApproval);
+                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
                 //config.EnableMessageType(NetIncomingMessageType.ConnectionLatencyUpdated);
             }
-            Host = (TNetPeer)Activator.CreateInstance(typeof(TNetPeer), new object[] { config.NetConfig });
+            Host = (TNetPeer)Activator.CreateInstance(typeof(TNetPeer), new object[] { Configuration.NetConfig });
             container = builder.Build();
             IncomingMessageHandler = new IncomingMessageHandler(container);
             Terminal = new CommandHost(new CommandParser(), GinetOut.Appender);
