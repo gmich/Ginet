@@ -14,6 +14,8 @@ PM> Install-Package Ginet -Pre
 
 Ginet favors message exchange. All classes that are handled via the `INetworkManager` must be marked with the `GinetPackageAttribute`. The classes must be marked as public with public getters / setters and contain only primitive types. For complex serialization you can provide your [custom serializer](https://github.com/gmich/Ginet/blob/master/README.md#custom-serializers) via attribute.
 
+Ginet inferres messages by adding a unique byte id.
+
 ```
           [GinetPackage]
           public class MyPackage
@@ -35,12 +37,12 @@ Create, configure and register the classes that are marked with the GinetPackage
 
 ```
           var server = new NetworkServer("MyServer",
-                    container=>
+                    builder =>
                     {
                         //via reflection
-                        container.RegisterPackages(Assembly.Load("Packages.Assembly.Name"));
+                        builder.RegisterPackages(Assembly.Load("Packages.Assembly.Name"));
                         //or manually
-                        container.RegisterPackage<MyPackage>();
+                        builder.RegisterPackage<MyPackage>();
                     }
                     cfg =>
                     {
@@ -141,8 +143,8 @@ Create, configure and register the classes that are marked with the GinetPackage
 
 ```
          var client = new NetworkClient("Chat", 
-                   container=>
-                        container.RegisterPackages(Assembly.Load("Packages.Assembly.Name"));
+                   builder=>
+                        builder.RegisterPackages(Assembly.Load("Packages.Assembly.Name"));
                    cfg =>
                    {  
                       //client configuration

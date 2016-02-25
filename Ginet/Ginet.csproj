@@ -48,7 +48,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Infrastructure\DelegateDisposable.cs" />
     <Compile Include="Infrastructure\ParallelTaskStarter.cs" />
+    <Compile Include="NetPackages\PackageContainer.cs" />
     <Compile Include="NetworkClient.cs" />
     <Compile Include="Logging\GinetOut.cs" />
     <Compile Include="Logging\ActionAppender.cs" />
@@ -61,7 +63,7 @@
     <Compile Include="NetPackages\IncomingMessageHandler.cs" />
     <Compile Include="NetPackages\IPackageSender.cs" />
     <Compile Include="NetPackages\IPackageSerializer.cs" />
-    <Compile Include="NetPackages\PackageConfigurator.cs" />
+    <Compile Include="NetPackages\PackageContainerBuilder.cs" />
     <Compile Include="NetPackages\PackageInfo.cs" />
     <Compile Include="NetPackages\PackageSenderLift.cs" />
     <Compile Include="NetPackages\PackageSerializerAttribute.cs" />

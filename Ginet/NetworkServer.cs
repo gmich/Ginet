@@ -9,8 +9,8 @@ namespace Ginet
 {
     public class NetworkServer : NetworkManager<NetServer>
     {
-        public NetworkServer(string serverName, Action<NetPeerConfiguration> configuration, IAppender output = null, bool enableAllIncomingMessages = true)
-            : base(serverName, configuration, output, enableAllIncomingMessages)
+        public NetworkServer(string serverName, Action<PackageContainerBuilder> packageContainer, Action<NetPeerConfiguration> configuration, IAppender output = null, bool enableAllIncomingMessages = true) 
+            : base(serverName, packageContainer, configuration, output, enableAllIncomingMessages)
         {
         }
 

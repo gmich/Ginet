@@ -7,7 +7,6 @@ using System.Linq;
 namespace Ginet.Infrastructure
 {
     internal class ConcurrentRepository<Tid, Titem>
-        where Titem : class
     {
         private readonly ConcurrentDictionary<Tid, Titem> items;
 
@@ -46,8 +45,6 @@ namespace Ginet.Infrastructure
 
         public bool Update(Tid id, Titem item)
         {
-            Contract.Requires(item != default(Titem));
-
             if (items.ContainsKey(id))
             {
                 items[id] = item;
@@ -68,8 +65,6 @@ namespace Ginet.Infrastructure
 
         public IDisposable Add(Tid id, Titem item)
         {
-            Contract.Requires(item != default(Titem));
-
             if (!items.ContainsKey(id))
             {
                 items.TryAdd(id, item);

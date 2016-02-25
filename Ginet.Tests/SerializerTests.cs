@@ -32,10 +32,13 @@ namespace Ginet.Tests
         [TestMethod]
         public void CustomSerializer_Resolves_Successfuly()
         {
-            var server = new NetworkServer("Test", cfg => cfg.Port = 1234);
+            var server = new NetworkServer("Test",
+                container=>
+                    container.Register<TestPackage>(),
+                cfg => 
+                    cfg.Port = 1234);
 
             server.Start(NetDeliveryMethod.ReliableOrdered, 0);
-            server.PackageConfigurator.Register<TestPackage>();
             server.Send(new TestPackage { Message = "test" }, (om, svr) =>
             {
                 svr.SendToAll(om, server.DeliveryMethod);

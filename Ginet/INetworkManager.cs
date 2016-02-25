@@ -11,7 +11,6 @@ namespace Ginet
         int Channel { get; set; }
         NetDeliveryMethod DeliveryMethod { get; set; }
         IncomingMessageHandler IncomingMessageHandler { get; }
-        PackageConfigurator PackageConfigurator { get; }
         TPeer Host { get; }
         IPackageSender LiftSender(Action<NetOutgoingMessage, TPeer> sender);
         NetOutgoingMessage ConvertToOutgoingMessage<TPackage>(TPackage package)

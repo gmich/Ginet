@@ -23,14 +23,14 @@ namespace Ginet.NetPackages
         private readonly ConcurrentRepository<NetConnection, Func<NetIncomingMessageType, NetIncomingMessage, Task>> connectionHandler =
             new ConcurrentRepository<NetConnection, Func<NetIncomingMessageType, NetIncomingMessage, Task>>();
 
-        private readonly Func<string, Tuple<PackageInfo, Func<IDisposable>>> packageRetriever;
+        private readonly PackageContainer packageContainer;
         private string SenderInfo(NetIncomingMessage im) =>
             $"{im.SenderEndPoint?.ToString()} - {im.SenderConnection?.Tag?.ToString()}";
 
-        internal IncomingMessageHandler(Func<string, Tuple<PackageInfo, Func<IDisposable>>> packageRetriever)
+        internal IncomingMessageHandler(PackageContainer packageContainer)
         {
             appender = GinetOut.Appender[GetType().FullName];
-            this.packageRetriever = packageRetriever;
+            this.packageContainer = packageContainer;
 
             messageHandlers.Add(NetIncomingMessageType.StatusChanged, async msg =>
              {
@@ -43,7 +43,7 @@ namespace Ginet.NetPackages
 
             messageHandlers.Add(NetIncomingMessageType.Data, async im =>
             {
-                var package = packageRetriever(im.ReadString()).Item1;
+                var package = packageContainer.GetPackageInfoFromByte(im.ReadByte());
                 if (package != null)
                 {
                     var message = package.Serializer.Decode(im, package.Type);
@@ -57,21 +57,25 @@ namespace Ginet.NetPackages
         public IDisposable OnPackage<TPackage>(Action<TPackage, NetIncomingMessage> handler)
             where TPackage : class
         {
-            var entry = packageRetriever(typeof(TPackage).FullName);
-            entry.Item1.Handler = (obj, im) =>
+            return RegisterPackageHandler<TPackage>((obj, im) =>
             {
                 handler((TPackage)obj, im);
                 return Task.FromResult(0);
-            };
-            return entry.Item2();
+            });
         }
-
+        
         public IDisposable OnPackage<TPackage>(Func<TPackage, NetIncomingMessage, Task> handler)
             where TPackage : class
         {
-            var entry = packageRetriever(typeof(TPackage).FullName);
-            entry.Item1.Handler = (obj, im) => handler((TPackage)obj, im);
-            return entry.Item2();
+            return RegisterPackageHandler<TPackage>((obj, im) => handler((TPackage)obj, im));
+        }
+
+        private IDisposable RegisterPackageHandler<TPackage>(Func<object, NetIncomingMessage, Task> packageHandler)
+            where TPackage : class
+        {
+            var entry = packageContainer.GetPackageInfoFromType(typeof(TPackage));
+            entry.Handler += packageHandler;
+            return new DelegateDisposable(() => entry.Handler -= packageHandler);
         }
 
         public IDisposable OnMessage(NetIncomingMessageType type, Func<NetIncomingMessage, Task> handler)

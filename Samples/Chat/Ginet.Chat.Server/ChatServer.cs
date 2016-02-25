@@ -11,14 +11,15 @@ namespace Ginet.Chat.Server
 
         public ChatServer()
         {
-            server = new NetworkServer("Chat", cfg =>
+            server = new NetworkServer("Chat", 
+            container=>
+                container.RegisterPackages(Assembly.Load("Ginet.Chat.Packages")),
+            cfg =>
             {
                 cfg.Port = 1234;
                 cfg.ConnectionTimeout = 5.0f;
             });
             server.IncomingMessageHandler.LogTraffic();
-            server.PackageConfigurator.RegisterPackages(Assembly.Load("Ginet.Chat.Packages"));
-            server.Start(NetDeliveryMethod.ReliableOrdered, 0);
 
             server.IncomingMessageHandler.OnConnectionChange(NetConnectionStatus.Disconnected, im =>             
                  server
@@ -64,7 +65,7 @@ namespace Ginet.Chat.Server
 
         public void Start()
         {
-            server.Host.Start();
+            server.Start(NetDeliveryMethod.ReliableOrdered, 0);
             server.ProcessMessagesInBackground();            
         }
 

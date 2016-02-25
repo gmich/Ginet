@@ -11,23 +11,24 @@ namespace Ginet
         where TNetPeer : NetPeer
     {
         private ParallelTaskStarter asyncMessageProcessor;
+        private readonly PackageContainer container;
 
         public TNetPeer Host { get; }
         public IncomingMessageHandler IncomingMessageHandler { get; }
-        public PackageConfigurator PackageConfigurator { get; }
         public IAppender Out { get; }
         public int Channel { get; set; }
         public NetDeliveryMethod DeliveryMethod { get; set; }
 
-        public NetworkManager(string serverName, Action<NetPeerConfiguration> configuration, IAppender output = null, bool enableAllIncomingMessages = true)
+        public NetworkManager(string serverName, Action<PackageContainerBuilder> containerBuilder, Action<NetPeerConfiguration> configuration, IAppender output = null, bool enableAllIncomingMessages = true)
         {
             if (Out != null)
             {
                 GinetOut.Appender = Out;
             }
-            PackageConfigurator = new PackageConfigurator();
             Out = GinetOut.Appender[GetType().FullName];
             var config = new NetPeerConfiguration(serverName);
+            var builder = new PackageContainerBuilder();
+            containerBuilder(builder);
 
             configuration(config);
 
@@ -49,11 +50,8 @@ namespace Ginet
                 //config.EnableMessageType(NetIncomingMessageType.ConnectionLatencyUpdated);
             }
             Host = (TNetPeer)Activator.CreateInstance(typeof(TNetPeer), new object[] { config });
-            IncomingMessageHandler = new IncomingMessageHandler(id =>
-                new Tuple<PackageInfo, Func<IDisposable>>(
-                    PackageConfigurator[id],
-                    () => PackageConfigurator.Packages.CreateDisposable(id))
-            );
+            container = builder.Build();
+            IncomingMessageHandler = new IncomingMessageHandler(container);
         }
 
         public IPackageSender LiftSender(Action<NetOutgoingMessage, TNetPeer> sender)
@@ -69,7 +67,7 @@ namespace Ginet
 
         public TPackage ReadAs<TPackage>(NetIncomingMessage im)
         {
-            var packageInfo = PackageConfigurator[im.ReadString()];
+            var packageInfo = container.GetPackageInfoFromByte(im.ReadByte());
             if (packageInfo == null)
             {
                 string errorMsg = $"The package {typeof(TPackage)} was not registered";
@@ -90,11 +88,11 @@ namespace Ginet
         public NetOutgoingMessage ConvertToOutgoingMessage<TPackage>(TPackage package)
             where TPackage : class
         {
-            var id = typeof(TPackage).FullName;
+            var id =container.GetIdFromType(typeof(TPackage));
             var om = Host.CreateMessage();
             om.Write(id);
 
-            var packageInfo = PackageConfigurator[id];
+            var packageInfo = container.GetPackageInfoFromByte(id);
             if (packageInfo == null)
             {
                 string errorMsg = $"The package {typeof(TPackage)} was not registered";

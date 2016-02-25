@@ -16,10 +16,11 @@ namespace Ginet.Chat.Client
         public ChatClient(string userName)
         {
             UserName = userName;
-            Client = new NetworkClient("Chat", cfg =>
-            { });
+            Client = new NetworkClient("Chat",
+                container => 
+                    container.RegisterPackages(Assembly.Load("Ginet.Chat.Packages")),
+                cfg =>  { });
             //Client.IncomingMessageHandler.LogTraffic();
-            Client.PackageConfigurator.RegisterPackages(Assembly.Load("Ginet.Chat.Packages"));
             Client.Start(NetDeliveryMethod.UnreliableSequenced, 0);
 
             Client.Connect("localhost", 1234, new ConnectionApprovalMessage
