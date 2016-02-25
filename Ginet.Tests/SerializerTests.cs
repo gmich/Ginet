@@ -33,15 +33,15 @@ namespace Ginet.Tests
         public void CustomSerializer_Resolves_Successfuly()
         {
             var server = new NetworkServer("Test",
-                container=>
-                    container.Register<TestPackage>(),
-                cfg => 
-                    cfg.Port = 1234);
+                cfg =>
+                    cfg.NetConfig.Port = 1234,
+                container =>
+                    container.Register<TestPackage>());
 
-            server.Start(NetDeliveryMethod.ReliableOrdered, 0);
+            server.Start();
             server.Send(new TestPackage { Message = "test" }, (om, svr) =>
             {
-                svr.SendToAll(om, server.DeliveryMethod);
+                svr.SendToAll(om, server.Configuration.DeliveryMethod);
             });
         }
     }

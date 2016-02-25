@@ -9,9 +9,14 @@ namespace Ginet
 {
     public class NetworkServer : NetworkManager<NetServer>
     {
-        public NetworkServer(string serverName, Action<PackageContainerBuilder> packageContainer, Action<NetPeerConfiguration> configuration, IAppender output = null, bool enableAllIncomingMessages = true) 
-            : base(serverName, packageContainer, configuration, output, enableAllIncomingMessages)
+        public NetworkServer(string name, Action<GinetConfig> configuration, Action<PackageContainerBuilder> containerBuilder) 
+            : base(name, configuration, containerBuilder)
         {
+        }
+
+        public void Start()
+        {
+            StartHost();
         }
 
         public IDisposable Broadcast<TPackage>(Action<TPackage, NetIncomingMessage, NetOutgoingMessage> responder, Action<TPackage> packageTransformer = null)
@@ -51,7 +56,7 @@ namespace Ginet
             {
                 return;
             }
-            Host.SendMessage(om, otherConnections, DeliveryMethod, Channel);
+            Host.SendMessage(om, otherConnections, Configuration.DeliveryMethod, Configuration.DefaultChannel);
         }
 
         public void SendToAllExcept<TPackage>(TPackage package, NetConnection excluded)

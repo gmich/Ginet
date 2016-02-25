@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GinetConfig.cs" />
     <Compile Include="Infrastructure\DelegateDisposable.cs" />
     <Compile Include="Infrastructure\ParallelTaskStarter.cs" />
     <Compile Include="NetPackages\PackageContainer.cs" />
@@ -72,6 +73,15 @@
     <Compile Include="INetworkManager.cs" />
     <Compile Include="NetworkManager.cs" />
     <Compile Include="NetworkServer.cs" />
+    <Compile Include="Terminal\CommandInfo.cs" />
+    <Compile Include="Terminal\Command.cs" />
+    <Compile Include="Terminal\CommandParser.cs" />
+    <Compile Include="Terminal\ICommandParser.cs" />
+    <Compile Include="Terminal\CommandTableEntry.cs" />
+    <Compile Include="Terminal\ExecutionResult.cs" />
+    <Compile Include="Terminal\CommandDelegate.cs" />
+    <Compile Include="Terminal\CommandHost.cs" />
+    <Compile Include="Terminal\ITerminal.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -12,14 +12,12 @@ namespace Ginet.Chat.Client
         public IPackageSender DefaultPackageSender { get; }
         public IncomingMessageHandler MessageHandler => client.IncomingMessageHandler;
 
-        public ClientManager(Action<NetPeerConfiguration> configuration)
+        public ClientManager(Action<GinetConfig> configuration)
         {
-             client = new NetworkClient("Chat",
-             container =>
-                 container.RegisterPackages(Assembly.Load("Ginet.Chat.Packages")),
-             configuration);
-
-            client.Start(NetDeliveryMethod.UnreliableSequenced, 0);
+            client = new NetworkClient("Chat",
+            configuration,
+            container =>
+                container.RegisterPackages(Assembly.Load("Ginet.Chat.Packages")));
             client.ProcessMessagesInBackground();
 
             DefaultPackageSender = client.LiftSender((msg, peer) =>

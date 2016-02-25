@@ -12,14 +12,15 @@ namespace Ginet.Chat.Server
         public ChatServer()
         {
             server = new NetworkServer("Chat",
+            cfg =>
+            {
+                cfg.NetConfig.Port = 1234;
+                cfg.NetConfig.ConnectionTimeout = 5.0f;
+                cfg.DeliveryMethod = NetDeliveryMethod.ReliableSequenced;
+            },
             container =>
             {
                 container.RegisterPackages(Assembly.Load("Ginet.Chat.Packages"));
-            },
-            cfg =>
-            {
-                cfg.Port = 1234;
-                cfg.ConnectionTimeout = 5.0f;
             });
             server.IncomingMessageHandler.LogTraffic();
             server.IncomingMessageHandler.OnMessage(
@@ -68,7 +69,7 @@ namespace Ginet.Chat.Server
 
         public void Start()
         {
-            server.Start(NetDeliveryMethod.ReliableOrdered, 0);
+            server.Start();
             server.ProcessMessagesInBackground();
         }
 

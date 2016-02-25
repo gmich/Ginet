@@ -8,23 +8,23 @@ namespace Ginet.Infrastructure
 {
     internal class ConcurrentRepository<Tid, Titem>
     {
-        private readonly ConcurrentDictionary<Tid, Titem> items;
+        public ConcurrentDictionary<Tid, Titem> Items { get; }
 
         public ConcurrentRepository()
         {
-            items = new ConcurrentDictionary<Tid, Titem>();
+            Items = new ConcurrentDictionary<Tid, Titem>();
         }
 
-        public int Count => items.Count;
-        public bool HasKey(Tid key) => items.ContainsKey(key);
+        public int Count => Items.Count;
+        public bool HasKey(Tid key) => Items.ContainsKey(key);
 
-        public IEnumerable<Titem> GetAll => items.Select(x => x.Value);
+        public IEnumerable<Titem> GetAll => Items.Select(x => x.Value);
 
         public Titem GetById(Tid id)
         {
-            if (items.ContainsKey(id))
+            if (Items.ContainsKey(id))
             {
-                return items[id];
+                return Items[id];
             }
             throw new Exception($"Key {id} was not found");
         }
@@ -41,23 +41,23 @@ namespace Ginet.Infrastructure
         public Titem this[Tid id] => GetById(id);
 
         public Titem Get(Func<Titem, bool> expression) =>
-            items.Where(x => expression(x.Value)).Select(x => x.Value).FirstOrDefault();
+            Items.Where(x => expression(x.Value)).Select(x => x.Value).FirstOrDefault();
 
         public bool Update(Tid id, Titem item)
         {
-            if (items.ContainsKey(id))
+            if (Items.ContainsKey(id))
             {
-                items[id] = item;
+                Items[id] = item;
                 return true;
             }
             return false;
         }
         public bool Delete(Tid id)
         {
-            if (items.ContainsKey(id))
+            if (Items.ContainsKey(id))
             {
                 Titem value;
-                while (items.TryRemove(id, out value)) ;
+                while (Items.TryRemove(id, out value)) ;
                 return true;
             }
             return false;
@@ -65,26 +65,26 @@ namespace Ginet.Infrastructure
 
         public IDisposable Add(Tid id, Titem item)
         {
-            if (!items.ContainsKey(id))
+            if (!Items.ContainsKey(id))
             {
-                items.TryAdd(id, item);
-                return new DeregisterDictionary<Tid, Titem>(items, item);
+                Items.TryAdd(id, item);
+                return new DeregisterDictionary<Tid, Titem>(Items, item);
             }
             return new DoNothingDisposable();
         }
 
         public IDisposable CreateDisposable(Tid id)
         {
-            if (items.ContainsKey(id))
+            if (Items.ContainsKey(id))
             {
-                return new DeregisterDictionary<Tid, Titem>(items, items[id]);
+                return new DeregisterDictionary<Tid, Titem>(Items, Items[id]);
             }
             throw new Exception("Id was not found");
         }
 
         private class DoNothingDisposable : IDisposable
         {
-            public void Dispose(){}
+            public void Dispose() { }
         }
 
         private class DeregisterDictionary<TKey, TValue> : IDisposable
