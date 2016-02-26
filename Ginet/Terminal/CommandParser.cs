@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Ginet.Terminal
 {
@@ -21,11 +22,15 @@ namespace Ginet.Terminal
         private IEnumerable<CommandInfo> GetCommandInfo(string[] words, int wordCounter, IList<CommandInfo> commands)
         {
             var commandInfo = new CommandInfo();
-            var arguments = new List<string>();
+            commandInfo.Arguments = new List<string>();
 
             if (wordCounter >= words.Length)
             {
                 return commands;
+            }
+            else
+            {
+                commands.Add(commandInfo);
             }
 
             commandInfo.Command = words[wordCounter];
@@ -35,15 +40,15 @@ namespace Ginet.Terminal
                 if (tokens.ContainsKey(words[wordCounter]))
                 {
                     commandInfo.Continuation = tokens[words[wordCounter]];
-                    commandInfo.Arguments = arguments;
-                    commands.Add(commandInfo);
                     GetCommandInfo(words, wordCounter + 1, commands);
+                    break;
                 }
-                arguments.Add(words[wordCounter]);
+                else
+                {
+                    commandInfo.Arguments.Add(words[wordCounter]);
+                }
             }
-            commandInfo.Arguments = arguments;
-            commands.Add(commandInfo);
-
+            
             return commands;
         }
     }

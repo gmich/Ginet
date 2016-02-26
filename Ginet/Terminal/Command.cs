@@ -5,6 +5,8 @@ namespace Ginet.Terminal
     [GinetPackage]
     public class Command
     {
-        string CommandText { get; set; }
+        public string Sender { get; set; }
+
+        public string CommandText { get; set; }
     }
 }

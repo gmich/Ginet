@@ -15,11 +15,12 @@ namespace Ginet
     {
         private readonly PackageContainer container;
         private ParallelTaskStarter asyncMessageProcessor;
+        private readonly IPEndPoint localAddress;
 
         public TNetPeer Host { get; }
         public IncomingMessageHandler IncomingMessageHandler { get; }
         public IAppender Out { get; }
-        public GinetConfig Configuration { get; }        
+        public GinetConfig Configuration { get; }
         public ITerminal Terminal { get; }
 
         public NetworkManager(string name, Action<GinetConfig> configuration, Action<PackageContainerBuilder> containerBuilder)
@@ -58,7 +59,17 @@ namespace Ginet
             Host = (TNetPeer)Activator.CreateInstance(typeof(TNetPeer), new object[] { Configuration.NetConfig });
             container = builder.Build();
             IncomingMessageHandler = new IncomingMessageHandler(container);
-            Terminal = new CommandHost(new CommandParser(), GinetOut.Appender);
+            localAddress = new IPEndPoint(
+                Configuration.NetConfig.LocalAddress,
+                Configuration.NetConfig.Port);
+
+            Terminal = new CommandHost(new CommandParser(), localAddress);
+        }
+
+        public void ExecuteCommand(string command)
+        {
+            var res = Terminal.ExecuteCommand(command, localAddress);
+            Configuration.TerminalOutput(res.ToString());
         }
 
         public IPackageSender LiftSender(Action<NetOutgoingMessage, TNetPeer> sender)
@@ -131,7 +142,7 @@ namespace Ginet
             }
         }
         protected void StartHost()
-        {      
+        {
             try
             {
                 Host.Start();

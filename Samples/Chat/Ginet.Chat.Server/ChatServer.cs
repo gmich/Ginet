@@ -1,6 +1,7 @@
 ﻿using Ginet.Chat.Packages;
 using Lidgren.Network;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Ginet.Chat.Server
 {
@@ -8,6 +9,11 @@ namespace Ginet.Chat.Server
     {
         private readonly NetworkServer server;
         private readonly string password = "1234";
+
+        public void ExecuteCommand(string cmd)
+        {
+            server.ExecuteCommand(cmd);
+        }
 
         public ChatServer()
         {
@@ -25,7 +31,7 @@ namespace Ginet.Chat.Server
             server.IncomingMessageHandler.LogTraffic();
             server.IncomingMessageHandler.OnMessage(
                     NetIncomingMessageType.ConnectionApproval, im =>
-                    ConfigureConnectionApproval(server.ReadAs<ConnectionApprovalMessage>(im), im));
+                        ConfigureConnectionApproval(server.ReadAs<ConnectionApprovalMessage>(im), im));
 
             ConfigureConnectionChange();
             ConfigureResponses();

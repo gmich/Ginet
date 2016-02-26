@@ -13,7 +13,7 @@ namespace Ginet.Terminal
 
         public ContinuationOption Continuation { get; set; }
         public string Command { get; set; }
-        public IEnumerable<string> Arguments { get; set; } = new List<string>();
+        public IList<string> Arguments { get; set; } = new List<string>();
         
     }
 

@@ -11,8 +11,9 @@ namespace Ginet
     {
         GinetConfig Configuration { get; }
         IncomingMessageHandler IncomingMessageHandler { get; }
-        ITerminal Terminal { get; }
         TPeer Host { get; }
+        ITerminal Terminal { get; }
+        void ExecuteCommand(string text);
         IPackageSender LiftSender(Action<NetOutgoingMessage, TPeer> sender);
         NetOutgoingMessage ConvertToOutgoingMessage<TPackage>(TPackage package)
          where TPackage : class;

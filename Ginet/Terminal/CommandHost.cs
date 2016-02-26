@@ -3,6 +3,7 @@ using Ginet.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,15 +15,13 @@ namespace Ginet.Terminal
             new ConcurrentRepository<string, CommandTableEntry>();
         private readonly ICommandParser parser;
 
-        public IAppender Output { get; set; }
-        public List<string> WhiteList { get; } = new List<string>();
+        public List<IPEndPoint> WhiteList { get; } = new List<IPEndPoint>();
 
-        public CommandHost(ICommandParser parser, IAppender output)
+        public CommandHost(ICommandParser parser, IPEndPoint host)
         {
             this.parser = parser;
-            Output = output;
-            WhiteList.Add("localhost");
-            RegisterCommand("help", "get help", (args) => ExecutionResult.Ok(Help(true)));
+            WhiteList.Add(host);
+            RegisterCommand("help", "get help", args => ExecutionResult.Ok(Help(true)));
         }
 
         private string Help(bool includeWhiteListed)
@@ -61,74 +60,74 @@ namespace Ginet.Terminal
 
         private class CallBackInfo
         {
+            public string Command { get; set; }
             public Func<IEnumerable<string>, ExecutionResult> CallBack { get; set; }
             public CommandInfo.ContinuationOption Continuation { get; set; }
             public IEnumerable<string> Arguments { get; set; }
         }
 
-        public Task<ExecutionResult> ExecuteCommand(string text, string sender = "localhost")
+        public ExecutionResult ExecuteCommand(string text, IPEndPoint sender)
         {
-            return Task.Run(() =>
+            var commands = parser.Parse(text);
+            var callBacks = new List<CallBackInfo>();
+
+            foreach (var commandInfo in commands)
             {
-                var commands = parser.Parse(text);
-                var callBacks = new List<CallBackInfo>();
-
-                foreach (var commandInfo in commands)
+                if (commandTable.HasKey(commandInfo.Command))
                 {
-                    if (commandTable.HasKey(commandInfo.Command))
+                    var cmdEntry = commandTable[commandInfo.Command];
+                    if (cmdEntry.OnlyWhiteListed)
                     {
-                        var cmdEntry = commandTable[commandInfo.Command];
-                        if (cmdEntry.OnlyWhiteListed)
+                        if (!WhiteList.Contains(sender))
                         {
-                            if (!WhiteList.Contains(sender))
-                            {
-                                return ExecutionResult.Faulted(ExecutionResult.Status.Unauthorized,
-                                    $"Unable to execute {commandInfo.Command}. Not white listed");
-                            }
+                            return ExecutionResult.Faulted(ExecutionResult.Status.Unauthorized,
+                                $"Unable to execute {commandInfo.Command}. Not white listed");
                         }
-                        callBacks.Add(new CallBackInfo
-                        {
-                            Arguments = commandInfo.Arguments,
-                            CallBack = args => commandTable[commandInfo.Command].Callback(args),
-                            Continuation = commandInfo.Continuation
-                        });
                     }
-                    else
+                    callBacks.Add(new CallBackInfo
                     {
-                        return ExecutionResult.Faulted(ExecutionResult.Status.CommandNotFound,
-                            $"{commandInfo.Command} is not a registered command");
-                    }
+                        Command = commandInfo.Command,
+                        Arguments = commandInfo.Arguments,
+                        CallBack = args => commandTable[commandInfo.Command].Callback(args),
+                        Continuation = commandInfo.Continuation
+                    });
                 }
+                else
+                {
+                    return ExecutionResult.Faulted(ExecutionResult.Status.CommandNotFound,
+                        $"{commandInfo.Command} is not a registered command");
+                }
+            }
 
-                var callbackResult = ExecutionResult.Faulted(ExecutionResult.Status.Faulted, "Nothing to execute");
-                for (int callbackCounter = 0; callbackCounter < callBacks.Count; callbackCounter++)
+            var callbackResult = ExecutionResult.Faulted(ExecutionResult.Status.Faulted, "Nothing to execute");
+            for (int callbackCounter = 0; callbackCounter < callBacks.Count; callbackCounter++)
+            {
+                try
                 {
                     callbackResult = callBacks[callbackCounter].CallBack.Invoke(callBacks[callbackCounter].Arguments);
-
-                    if (!callbackResult.Successful)
-                    {
-                        return callbackResult;
-                    }
-                    switch (callBacks[callbackCounter].Continuation)
-                    {
-                        case CommandInfo.ContinuationOption.Flush:
-                            Output.Info(callbackResult.Result);
-                            break;
-                        case CommandInfo.ContinuationOption.Append:
-                            if (callbackCounter + 1 <= callBacks.Count)
-                            {
-                                callBacks[callbackCounter + 1].Arguments = new[] { callbackResult.Result };
-                            }
-                            else
-                            {
-                                Output.Info(callbackResult.Result);
-                            }
-                            break;
-                    }
                 }
-                return callbackResult;
-            });
+                catch (Exception ex)
+                {
+                    return ExecutionResult.Faulted(ExecutionResult.Status.Exception,
+                        $"{callBacks[callbackCounter].Command} execution threw an exception. {ex.Message}");
+                }
+                if (!callbackResult.Successful)
+                {
+                    return callbackResult;
+                }
+                switch (callBacks[callbackCounter].Continuation)
+                {
+                    case CommandInfo.ContinuationOption.Flush:
+                        break;
+                    case CommandInfo.ContinuationOption.Append:
+                        if (callbackCounter + 1 < callBacks.Count)
+                        {
+                            callBacks[callbackCounter + 1].Arguments = new[] { callbackResult.Result };
+                        }
+                        break;
+                }
+            }
+            return callbackResult;
         }
-
     }
 }

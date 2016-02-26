@@ -7,21 +7,30 @@ namespace Ginet.Chat.Server
     {
         static void Main(string[] args)
         {
-            HostFactory.Run(x =>
-            {
-                x.Service<ChatServer>(s =>
-                {
-                    s.ConstructUsing(name => new ChatServer());
-                    s.WhenStarted(tc => tc.Start());
-                    s.WhenStopped(tc => tc.Stop());
-                });
-                x.RunAsLocalSystem();
-                x.SetDescription("GinetChat Windows Service");
-                x.SetDisplayName("GinetChat Windows Service");
-                x.SetServiceName("GinetChat");
-            });
+            //HostFactory.Run(x =>
+            //{
+            //    x.Service<ChatServer>(s =>
+            //    {
+            //        s.ConstructUsing(name => new ChatServer());
+            //        s.WhenStarted(tc => tc.Start());
+            //        s.WhenStopped(tc => tc.Stop());
+            //    });
+            //    x.RunAsLocalSystem();
+            //    x.SetDescription("GinetChat Windows Service");
+            //    x.SetDisplayName("GinetChat Windows Service");
+            //    x.SetServiceName("GinetChat");
+            //});
 
-            Console.ReadLine();
+            var server = new ChatServer();
+            server.Start();
+            string input;
+
+            while ((input = Console.ReadLine()) != "quit")
+            {
+                server.ExecuteCommand(input);
+            }
+
+            server.Stop();
         }
     }
 }

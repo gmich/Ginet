@@ -8,6 +8,7 @@ namespace Ginet.Terminal
         {
             Ok,
             Faulted,
+            Exception,
             CommandNotFound,
             Unauthorized
         }
@@ -37,6 +38,13 @@ namespace Ginet.Terminal
         public static ExecutionResult Faulted(Status status, string reason)
         {
             return new ExecutionResult(status, reason, null);
+        }
+
+        public override string ToString()
+        {
+            return (Successful) ? 
+                Result : 
+                $"Execution status: {ExecutionStatus}. Reason: {ErrorMessage}";
         }
 
     }

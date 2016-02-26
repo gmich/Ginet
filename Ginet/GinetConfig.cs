@@ -1,5 +1,6 @@
 ﻿using Ginet.Logging;
 using Lidgren.Network;
+using System;
 
 namespace Ginet
 {
@@ -10,5 +11,6 @@ namespace Ginet
         public NetPeerConfiguration NetConfig { get; internal set; }
         public int DefaultChannel { get; set; }
         public NetDeliveryMethod DeliveryMethod { get; set; }
+        public Action<string> TerminalOutput { get; set; } = Console.WriteLine;
     }
 }
