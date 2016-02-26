@@ -234,4 +234,10 @@ For custom encoding / decoding for a type, simply implement the `IPackageSeriali
 
 ----
 
-More examples [here](https://github.com/gmich/Ginet/tree/master/Samples/Chat).
+A simple client-server chat example [here](https://github.com/gmich/Ginet/tree/2f653c9b95a0e74f5952985f0f5a1e38afbd34bf/Samples).
+
+##Development Roadmap
+ 
+### v0.2.0 beta
+Simple terminal with command registration, command piping, and remote execution.
+    
