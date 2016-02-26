@@ -26,7 +26,7 @@ namespace Ginet.Chat.Client
 
         public void ConnectClient(ConnectionApprovalMessage message)
         {
-            client.Connect("localhost", 1234, message);
+            client.Connect("localhost", 1111, message);
         }
 
         public void Disconnect()

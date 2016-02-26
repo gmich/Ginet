@@ -20,9 +20,9 @@ namespace Ginet.Chat.Server
             server = new NetworkServer("Chat",
             cfg =>
             {
-                cfg.NetConfig.Port = 1234;
+                cfg.NetConfig.Port = 1111;
                 cfg.NetConfig.ConnectionTimeout = 5.0f;
-                cfg.DeliveryMethod = NetDeliveryMethod.ReliableSequenced;
+                cfg.DeliveryMethod = NetDeliveryMethod.ReliableOrdered;
             },
             container =>
             {

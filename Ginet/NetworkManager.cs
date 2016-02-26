@@ -37,6 +37,7 @@ namespace Ginet
 
             Out = GinetOut.Appender[GetType().FullName];
             var builder = new PackageContainerBuilder();
+            builder.Register<Command>();
             containerBuilder(builder);
 
             if (Configuration.EnableAllIncomingMessages)

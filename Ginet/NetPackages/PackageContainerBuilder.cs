@@ -20,7 +20,6 @@ namespace Ginet.NetPackages
         internal PackageContainerBuilder()
         {
             appender = GinetOut.Appender[GetType().FullName];
-            Register<Terminal.Command>();
         }
 
         private void ConfigureCustomAttribute<TAttribute>(Type type, Action<TAttribute> action)

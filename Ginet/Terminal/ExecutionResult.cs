@@ -9,6 +9,7 @@ namespace Ginet.Terminal
             Ok,
             Faulted,
             Exception,
+            WrongCommandFormat,
             CommandNotFound,
             Unauthorized
         }

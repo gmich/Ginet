@@ -21,7 +21,7 @@ namespace Ginet.Terminal
         {
             this.parser = parser;
             WhiteList.Add(host);
-            RegisterCommand("help", "get help", args => ExecutionResult.Ok(Help(true)));
+            RegisterCommand("help", "get help", args => ExecutionResult.Ok(Help(true)), ExecutionOptions.None);
         }
 
         private string Help(bool includeWhiteListed)
@@ -31,20 +31,20 @@ namespace Ginet.Terminal
             {
                 if (!includeWhiteListed)
                 {
-                    if (entry.Value.OnlyWhiteListed)
+                    if (entry.Value.Options.OnlyWhiteListed)
                     {
                         strBuilder.AppendLine($"{entry.Key} - {entry.Value.Description}");
                     }
                 }
                 else
                 {
-                    strBuilder.AppendLine($"{entry.Key} - {entry.Value.OnlyWhiteListed} - {entry.Value.Description}");
+                    strBuilder.AppendLine($"{entry.Key} - {entry.Value.Options.OnlyWhiteListed} - {entry.Value.Description}");
                 }
             }
             return strBuilder.ToString();
         }
 
-        public IDisposable RegisterCommand(string command, string description, CommandDelegate callback)
+        public IDisposable RegisterCommand(string command, string description, CommandDelegate callback, ExecutionOptions options)
         {
             Contract.Requires(!string.IsNullOrEmpty(command));
             Contract.Requires(!string.IsNullOrEmpty(description));
@@ -54,7 +54,8 @@ namespace Ginet.Terminal
                 new CommandTableEntry
                 {
                     Description = description,
-                    Callback = callback
+                    Callback = callback,
+                    Options = options
                 });
         }
 
@@ -76,12 +77,21 @@ namespace Ginet.Terminal
                 if (commandTable.HasKey(commandInfo.Command))
                 {
                     var cmdEntry = commandTable[commandInfo.Command];
-                    if (cmdEntry.OnlyWhiteListed)
+                    if (cmdEntry.Options.OnlyWhiteListed)
                     {
                         if (!WhiteList.Contains(sender))
                         {
                             return ExecutionResult.Faulted(ExecutionResult.Status.Unauthorized,
                                 $"Unable to execute {commandInfo.Command}. Not white listed");
+                        }
+                    }
+                    if (cmdEntry.Options.Validator != null)
+                    {
+                        var validationResult = cmdEntry.Options.Validator.Validate(commandInfo.Arguments);
+                        if (!validationResult.Success)
+                        {
+                            return ExecutionResult.Faulted(ExecutionResult.Status.WrongCommandFormat,
+                                $"Validation for command {commandInfo.Command} failed. {validationResult.Message}");
                         }
                     }
                     callBacks.Add(new CallBackInfo
