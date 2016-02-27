@@ -21,25 +21,24 @@ namespace Ginet.Terminal
         {
             this.parser = parser;
             WhiteList.Add(host);
-            RegisterCommand("help", "get help", args => ExecutionResult.Ok(Help(true)), ExecutionOptions.None);
+
+            RegisterCommand("help", "Displays a brief description of the command table", args => 
+                ExecutionResult.Ok(
+                    GetHelp()),
+                ExecutionOptions
+                .Everyone
+                .WithValidator(CommandValidator.ZeroArguments));
+
+            new CommonCommands(this);
         }
 
-        private string Help(bool includeWhiteListed)
+        private string GetHelp()
         {
             StringBuilder strBuilder = new StringBuilder();
             foreach (var entry in commandTable.Items)
             {
-                if (!includeWhiteListed)
-                {
-                    if (entry.Value.Options.OnlyWhiteListed)
-                    {
-                        strBuilder.AppendLine($"{entry.Key} - {entry.Value.Description}");
-                    }
-                }
-                else
-                {
                     strBuilder.AppendLine($"{entry.Key} - {entry.Value.Options.OnlyWhiteListed} - {entry.Value.Description}");
-                }
+                
             }
             return strBuilder.ToString();
         }

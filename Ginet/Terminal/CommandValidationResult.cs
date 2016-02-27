@@ -10,6 +10,12 @@
             Message = message;
         }
 
+        public static CommandValidationResult Ok =>
+            new CommandValidationResult(true, string.Empty);
+
+        public static CommandValidationResult Error(string msg) =>
+            new CommandValidationResult(false, msg);
+
     }
 
 }

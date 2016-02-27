@@ -9,7 +9,7 @@ namespace Ginet.Chat.Client
         {
             var clientManager = new ClientManager(cfg =>
             {
-                cfg.DeliveryMethod = NetDeliveryMethod.ReliableSequenced;
+                cfg.DeliveryMethod = NetDeliveryMethod.ReliableOrdered;
             });
             var chatter = new Chatter(clientManager.DefaultPackageSender, clientManager.MessageHandler);
             clientManager.ConnectClient(chatter.ConnectionApprovalMessage);

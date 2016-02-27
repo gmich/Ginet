@@ -15,7 +15,7 @@ namespace Ginet
         {
             Terminal.RegisterCommand("show-clients", "shows all connected clients", args =>
                   ExecutionResult.Ok(String.Concat(Host.Connections.Select(c => c.ToString() + Environment.NewLine))),
-                  ExecutionOptions.None);
+                  ExecutionOptions.Everyone);
         }
 
         public void Start()

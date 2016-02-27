@@ -76,6 +76,8 @@
     <Compile Include="Terminal\CommandInfo.cs" />
     <Compile Include="Terminal\Command.cs" />
     <Compile Include="Terminal\CommandParser.cs" />
+    <Compile Include="Terminal\CommandValidator.cs" />
+    <Compile Include="Terminal\CommonCommands.cs" />
     <Compile Include="Terminal\ExecutionOptions.cs" />
     <Compile Include="Terminal\ICommandParser.cs" />
     <Compile Include="Terminal\CommandTableEntry.cs" />
