@@ -73,6 +73,7 @@
     <Compile Include="INetworkManager.cs" />
     <Compile Include="NetworkManager.cs" />
     <Compile Include="NetworkServer.cs" />
+    <Compile Include="Terminal\CommandBuilder.cs" />
     <Compile Include="Terminal\CommandInfo.cs" />
     <Compile Include="Terminal\Command.cs" />
     <Compile Include="Terminal\CommandParser.cs" />

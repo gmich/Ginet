@@ -6,7 +6,7 @@
         public string Message { get; }
         public CommandValidationResult(bool success, string message)
         {
-            Success = Success;
+            Success = success;
             Message = message;
         }
 

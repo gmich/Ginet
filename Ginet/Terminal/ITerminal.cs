@@ -8,6 +8,6 @@ namespace Ginet.Terminal
     {
         List<IPEndPoint> WhiteList { get; }
         ExecutionResult ExecuteCommand(string text, IPEndPoint sender);
-        IDisposable RegisterCommand(string command, string description, CommandDelegate callback, ExecutionOptions options);
+        IDisposable RegisterCommand(string command, string briefDescription, CommandDelegate callback, ExecutionOptions options, Action<CommandBuilder> build = null);
     }
 }

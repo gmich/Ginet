@@ -43,7 +43,7 @@ namespace Ginet.Terminal
                     GetCommandInfo(words, wordCounter + 1, commands);
                     break;
                 }
-                else
+                else 
                 {
                     commandInfo.Arguments.Add(words[wordCounter]);
                 }

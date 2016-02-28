@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Ginet.Terminal
@@ -22,7 +23,9 @@ namespace Ginet.Terminal
             this.parser = parser;
             WhiteList.Add(host);
 
-            RegisterCommand("help", "Displays a brief description of the command table", args => 
+            RegisterCommand("help",
+                "Displays a brief description of the command table",
+                args =>
                 ExecutionResult.Ok(
                     GetHelp()),
                 ExecutionOptions
@@ -34,28 +37,34 @@ namespace Ginet.Terminal
 
         private string GetHelp()
         {
+            string helpFormat = "{0,-15} | {1}";
+            string line = "------------------------------------------";
             StringBuilder strBuilder = new StringBuilder();
+            strBuilder.AppendLine(line);
+            strBuilder.AppendLine(String.Format(helpFormat, "Command", "Description"));
+            strBuilder.AppendLine(line);
+
             foreach (var entry in commandTable.Items)
             {
-                    strBuilder.AppendLine($"{entry.Key} - {entry.Value.Options.OnlyWhiteListed} - {entry.Value.Description}");
-                
+                var command = entry.Key;
+                if (entry.Value.Options.OnlyWhiteListed)
+                {
+                    command += " *";
+                }
+                strBuilder.AppendLine(String.Format(helpFormat,
+                    command, entry.Value.BriefDescription));
             }
+            strBuilder.AppendLine(line);
             return strBuilder.ToString();
         }
 
-        public IDisposable RegisterCommand(string command, string description, CommandDelegate callback, ExecutionOptions options)
+        public IDisposable RegisterCommand(string command, string briefDescription, CommandDelegate callback, ExecutionOptions options, Action<CommandBuilder> build = null)
         {
             Contract.Requires(!string.IsNullOrEmpty(command));
-            Contract.Requires(!string.IsNullOrEmpty(description));
-            Contract.Requires(callback != null);
-
+            var cmdBuilder = new CommandBuilder(briefDescription, callback, options);
+            build?.Invoke(cmdBuilder);
             return commandTable.Add(command,
-                new CommandTableEntry
-                {
-                    Description = description,
-                    Callback = callback,
-                    Options = options
-                });
+                cmdBuilder.Build);
         }
 
         private class CallBackInfo
@@ -65,7 +74,7 @@ namespace Ginet.Terminal
             public CommandInfo.ContinuationOption Continuation { get; set; }
             public IEnumerable<string> Arguments { get; set; }
         }
-
+        
         public ExecutionResult ExecuteCommand(string text, IPEndPoint sender)
         {
             var commands = parser.Parse(text);
@@ -93,6 +102,7 @@ namespace Ginet.Terminal
                                 $"Validation for command {commandInfo.Command} failed. {validationResult.Message}");
                         }
                     }
+
                     callBacks.Add(new CallBackInfo
                     {
                         Command = commandInfo.Command,
