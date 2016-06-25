@@ -1,6 +1,7 @@
 # Ginet
 
 [![Build status](https://ci.appveyor.com/api/projects/status/4ctmsofu3ilvak50?svg=true)](https://ci.appveyor.com/project/gmich/ginet) 
+[![Nuget downloads](https://img.shields.io/nuget/v/ginet.svg)](https://www.nuget.org/packages/ginet/)
 
 A fluent networking library build on top of [lidgren network](https://github.com/lidgren/lidgren-network-gen3). Ginet extends lidgren network with a fluent and functional API.
 
