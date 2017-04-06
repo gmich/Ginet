@@ -5,7 +5,7 @@
 
 A fluent networking library build on top of [lidgren network](https://github.com/lidgren/lidgren-network-gen3). Ginet extends lidgren network with a fluent and functional API.
 
-##Quick start
+## Quick start
 
 Ginet is available as a [NuGet package](https://www.nuget.org/packages/Ginet/). You can install it using the NuGet Package Console window:
 
@@ -35,7 +35,7 @@ For complex serialization you can provide your [custom serializer](https://githu
           }
 ```
 
-###Server
+### Server
 
 Create, configure and register the classes that are marked with the GinetPackage attribute
 
@@ -141,7 +141,7 @@ Upon adding a handler, an `IDisposable` object is returned. Disposing it causes 
 
 ----
 
-###Client
+### Client
 
 Create, configure and register the classes that are marked with the GinetPackage attribute
 
@@ -198,7 +198,7 @@ Create a message sender lifter
 
 ---
 
-###Logging
+### Logging
 
 For custom logging targets implement the `IAppender` interface and pass it in the client , server creation
 
@@ -220,7 +220,7 @@ The default `IAppender` uses the `Console.WriteLine` in the `ActionAppender` con
 
 ----
 
-###Custom serializers
+### Custom serializers
 
 For custom encoding / decoding for a type, simply implement the `IPackageSerializer` interface add the `PackageSerializerAttribute` to the class
 
@@ -237,7 +237,7 @@ For custom encoding / decoding for a type, simply implement the `IPackageSeriali
 
 A simple client-server chat example [here](https://github.com/gmich/Ginet/tree/2f653c9b95a0e74f5952985f0f5a1e38afbd34bf/Samples).
 
-##Development Roadmap
+## Development Roadmap
  
 ### v0.2.0 beta
 Simple terminal with command registration, command piping, and remote execution.
