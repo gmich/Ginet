@@ -9,7 +9,7 @@ namespace Ginet
 {
     public class NetworkServer : NetworkManager<NetServer>
     {
-        public NetworkServer(string serverName, Action<PackageContainerBuilder> packageContainer, Action<NetPeerConfiguration> configuration, IAppender output = null, bool enableAllIncomingMessages = true) 
+        public NetworkServer(string serverName, Action<PackageContainerBuilder> packageContainer, Action<NetPeerConfiguration> configuration, IAppender output = null, bool enableAllIncomingMessages = true)
             : base(serverName, packageContainer, configuration, output, enableAllIncomingMessages)
         {
         }
@@ -24,13 +24,13 @@ namespace Ginet
             });
         }
 
-        public IDisposable BroadcastExceptSender<TPackage>(Action<NetConnection,TPackage> packageTransformer = null)
+        public IDisposable BroadcastExceptSender<TPackage>(Action<NetConnection, TPackage> packageTransformer = null)
             where TPackage : class
         {
             return IncomingMessageHandler.OnPackage<TPackage>((msg, im) =>
             {
-                packageTransformer?.Invoke(im.SenderConnection,msg);
-                SendToAllExcept(ConvertToOutgoingMessage(msg), im.SenderConnection);
+                packageTransformer?.Invoke(im.SenderConnection, msg);
+                SendToAllExcept(ConvertToOutgoingMessage(msg), new[] { im.SenderConnection });
             });
         }
 
@@ -44,9 +44,9 @@ namespace Ginet
             }));
         }
 
-        public void SendToAllExcept(NetOutgoingMessage om, NetConnection excluded)
+        public void SendToAllExcept(NetOutgoingMessage om, params NetConnection[] excluded)
         {
-            var otherConnections = Host.Connections.Where(c => c != excluded).ToArray();
+            var otherConnections = Host.Connections.Where(c => !excluded.Contains(c)).ToArray();
             if (!otherConnections.Any())
             {
                 return;
@@ -54,7 +54,7 @@ namespace Ginet
             Host.SendMessage(om, otherConnections, DeliveryMethod, Channel);
         }
 
-        public void SendToAllExcept<TPackage>(TPackage package, NetConnection excluded)
+        public void SendToAllExcept<TPackage>(TPackage package, params NetConnection[] excluded)
             where TPackage : class
         {
             SendToAllExcept(ConvertToOutgoingMessage(package), excluded);
