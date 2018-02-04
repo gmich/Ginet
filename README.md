@@ -10,7 +10,7 @@ A fluent networking library build on top of [lidgren network](https://github.com
 Ginet is available as a [NuGet package](https://www.nuget.org/packages/Ginet/). You can install it using the NuGet Package Console window:
 
 ```
-PM> Install-Package Ginet -Pre
+PM> Install-Package Ginet
 ```
 
 Ginet favors message exchange. All classes that are handled via the `INetworkManager` must be marked with the `GinetPackageAttribute`. Ginet inferres messages by adding a unique byte id.
