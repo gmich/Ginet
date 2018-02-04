@@ -10,7 +10,7 @@ A fluent networking library build on top of [lidgren network](https://github.com
 Ginet is available as a [NuGet package](https://www.nuget.org/packages/Ginet/). You can install it using the NuGet Package Console window:
 
 ```
-PM> Install-Package Ginet -Pre
+PM> Install-Package Ginet
 ```
 
 Ginet favors message exchange. All classes that are handled via the `INetworkManager` must be marked with the `GinetPackageAttribute`. Ginet inferres messages by adding a unique byte id.
@@ -238,4 +238,6 @@ For custom encoding / decoding for a type, simply implement the `IPackageSeriali
 
 A simple client-server chat example [here](https://github.com/gmich/Ginet/tree/2f653c9b95a0e74f5952985f0f5a1e38afbd34bf/Samples).
 
-    
+---
+
+<div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
