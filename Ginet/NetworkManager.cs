@@ -1,11 +1,8 @@
 ﻿using Ginet.Infrastructure;
 using Ginet.Logging;
 using Ginet.NetPackages;
-using Ginet.Terminal;
 using Lidgren.Network;
 using System;
-using System.Net;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace Ginet
@@ -13,64 +10,48 @@ namespace Ginet
     public abstract class NetworkManager<TNetPeer> : INetworkManager<TNetPeer>
         where TNetPeer : NetPeer
     {
-        private readonly PackageContainer container;
         private ParallelTaskStarter asyncMessageProcessor;
-        private readonly IPEndPoint localAddress;
+        private readonly PackageContainer container;
 
         public TNetPeer Host { get; }
         public IncomingMessageHandler IncomingMessageHandler { get; }
         public IAppender Out { get; }
-        public GinetConfig Configuration { get; }
-        public ITerminal Terminal { get; }
+        public int Channel { get; set; }
+        public NetDeliveryMethod DeliveryMethod { get; set; }
 
-        public NetworkManager(string name, Action<GinetConfig> configuration, Action<PackageContainerBuilder> containerBuilder)
+        public NetworkManager(string serverName, Action<PackageContainerBuilder> containerBuilder, Action<NetPeerConfiguration> configuration, IAppender output = null, bool enableAllIncomingMessages = true)
         {
-            Configuration = new GinetConfig
-            {
-                NetConfig = new NetPeerConfiguration(name)
-            };
-            if (Configuration.Output != null)
+            if (Out != null)
             {
                 GinetOut.Appender = Out;
             }
-            configuration(Configuration);
-
             Out = GinetOut.Appender[GetType().FullName];
+            var config = new NetPeerConfiguration(serverName);
             var builder = new PackageContainerBuilder();
-            builder.Register<Command>();
             containerBuilder(builder);
 
-            if (Configuration.EnableAllIncomingMessages)
+            configuration(config);
+
+            if (enableAllIncomingMessages)
             {
-                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.Data);
-                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.NatIntroductionSuccess);
-                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
-                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.Receipt);
-                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.StatusChanged);
-                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.UnconnectedData);
-                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.WarningMessage);
-                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.VerboseDebugMessage);
-                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.ErrorMessage);
-                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.Error);
-                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.DebugMessage);
-                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.ConnectionApproval);
-                Configuration.NetConfig.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
+                config.EnableMessageType(NetIncomingMessageType.Data);
+                config.EnableMessageType(NetIncomingMessageType.NatIntroductionSuccess);
+                config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
+                config.EnableMessageType(NetIncomingMessageType.Receipt);
+                config.EnableMessageType(NetIncomingMessageType.StatusChanged);
+                config.EnableMessageType(NetIncomingMessageType.UnconnectedData);
+                config.EnableMessageType(NetIncomingMessageType.WarningMessage);
+                config.EnableMessageType(NetIncomingMessageType.VerboseDebugMessage);
+                config.EnableMessageType(NetIncomingMessageType.ErrorMessage);
+                config.EnableMessageType(NetIncomingMessageType.Error);
+                config.EnableMessageType(NetIncomingMessageType.DebugMessage);
+                config.EnableMessageType(NetIncomingMessageType.ConnectionApproval);
+                config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
                 //config.EnableMessageType(NetIncomingMessageType.ConnectionLatencyUpdated);
             }
-            Host = (TNetPeer)Activator.CreateInstance(typeof(TNetPeer), new object[] { Configuration.NetConfig });
+            Host = (TNetPeer)Activator.CreateInstance(typeof(TNetPeer), new object[] { config });
             container = builder.Build();
             IncomingMessageHandler = new IncomingMessageHandler(container);
-            localAddress = new IPEndPoint(
-                Configuration.NetConfig.LocalAddress,
-                Configuration.NetConfig.Port);
-
-            Terminal = new CommandHost(new CommandParser(), localAddress);
-        }
-
-        public void ExecuteCommand(string command)
-        {
-            var res = Terminal.ExecuteCommand(command, localAddress);
-            Configuration.TerminalOutput(res.ToString());
         }
 
         public IPackageSender LiftSender(Action<NetOutgoingMessage, TNetPeer> sender)
@@ -107,7 +88,7 @@ namespace Ginet
         public NetOutgoingMessage ConvertToOutgoingMessage<TPackage>(TPackage package)
             where TPackage : class
         {
-            var id = container.GetIdFromType(typeof(TPackage));
+            var id =container.GetIdFromType(typeof(TPackage));
             var om = Host.CreateMessage();
             om.Write(id);
 
@@ -142,8 +123,12 @@ namespace Ginet
                 Out.Warn("Unable to stop the server. Server is not running!");
             }
         }
-        protected void StartHost()
+
+        public void Start(NetDeliveryMethod defaultDeliveryMethod, int defaultChannel)
+
         {
+            DeliveryMethod = defaultDeliveryMethod;
+            Channel = defaultChannel;
             try
             {
                 Host.Start();

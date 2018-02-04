@@ -1,5 +1,4 @@
-﻿using Lidgren.Network;
-using System;
+﻿using System;
 
 namespace Ginet.Chat.Client
 {
@@ -7,15 +6,12 @@ namespace Ginet.Chat.Client
     {
         static void Main(string[] args)
         {
-            var clientManager = new ClientManager(cfg =>
-            {
-                cfg.DeliveryMethod = NetDeliveryMethod.ReliableOrdered;
-            });
-            var chatter = new Chatter(clientManager.DefaultPackageSender, clientManager.MessageHandler);
+            var clientManager = new ClientManager(cfg=> { });
+            var chatter = new Chatter(clientManager.DefaultPackageSender,clientManager.MessageHandler);
             clientManager.ConnectClient(chatter.ConnectionApprovalMessage);
 
             string input;
-            while ((input = Console.ReadLine()) != "quit")
+            while((input = Console.ReadLine()) != "quit")
             {
                 chatter.SendChatMessage(input);
             }

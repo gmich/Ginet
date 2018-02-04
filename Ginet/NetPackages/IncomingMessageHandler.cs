@@ -63,7 +63,7 @@ namespace Ginet.NetPackages
                 return Task.FromResult(0);
             });
         }
-
+        
         public IDisposable OnPackage<TPackage>(Func<TPackage, NetIncomingMessage, Task> handler)
             where TPackage : class
         {
@@ -146,11 +146,8 @@ namespace Ginet.NetPackages
             });
 
             globalHandler.Add(connectionHandler.Count + 1,
-                (msgType, msg) =>
-                {
-                    appender.Info($"{msgType} - {SenderInfo(msg)}");
-                    return Task.FromResult(0);
-                });
+                (msgType, msg) => Task.Run(() =>
+                    appender.Info($"{msgType} - {SenderInfo(msg)}")));
 
             LogConnectionChange(new[]
             {
@@ -171,11 +168,8 @@ namespace Ginet.NetPackages
             {
                 messageHandlers.Add(
                     typeAndLogger.Key,
-                    msg =>
-                    {
-                        typeAndLogger.Value($"{msg.ReadString()} - {SenderInfo(msg)}.");
-                        return Task.FromResult(0);
-                    });
+                    msg => Task.Run(() =>
+                        typeAndLogger.Value($"{msg.ReadString()} - {SenderInfo(msg)}.")));
             }
         }
 
@@ -183,39 +177,40 @@ namespace Ginet.NetPackages
         {
             foreach (var status in netStatus)
             {
-                connectionChange.Add(status, msg =>
-                {
-                    appender.Info($"Status Changed: {status} - {SenderInfo(msg)}");
-                    return Task.FromResult(0);
-                });
+                connectionChange.Add(status, msg => Task.Run(() =>
+                appender.Info($"Status Changed: {status} - {SenderInfo(msg)}")));
             }
         }
 
-        internal async Task ProcessNetworkMessages(NetPeer peer)
+        internal Task ProcessNetworkMessages(NetPeer peer)
         {
-            NetIncomingMessage im;
-            peer.MessageReceivedEvent.WaitOne();
-
-            while ((im = peer.ReadMessage()) != null)
+            return Task.Run(async () =>
             {
-                if (im.SenderConnection != null)
-                {
-                    if (connectionHandler.HasKey(im.SenderConnection))
-                    {
-                        await connectionHandler[im.SenderConnection].Invoke(im.MessageType, im);
-                    }
-                }
-                foreach (var handler in globalHandler.GetAll)
-                {
-                    await handler(im.MessageType, im);
-                }
-                if (messageHandlers.HasKey(im.MessageType))
-                {
-                    await messageHandlers[im.MessageType].Invoke(im);
-                }
-                peer.Recycle(im);
+                NetIncomingMessage im;
+                peer.MessageReceivedEvent.WaitOne();
 
-            }
+                while ((im = peer.ReadMessage()) != null)
+                {
+                    if (im.SenderConnection != null)
+                    {
+                        if (connectionHandler.HasKey(im.SenderConnection))
+                        {
+                            await connectionHandler[im.SenderConnection].Invoke(im.MessageType, im);
+                        }
+                    }
+                    foreach (var handler in globalHandler.GetAll)
+                    {
+                        await handler(im.MessageType, im);
+                    }
+                    if (messageHandlers.HasKey(im.MessageType))
+                    {
+                        await messageHandlers[im.MessageType].Invoke(im);
+                    }
+                    peer.Recycle(im);
+                }
+            });
         }
+
+
     }
 }
