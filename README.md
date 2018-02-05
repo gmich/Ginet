@@ -56,8 +56,8 @@ Create, configure and register the classes that are marked with the GinetPackage
                         //via reflection
                         builder.RegisterPackages(Assembly.Load("Packages.Assembly.Name"));
                         //or manually
-                        builder.RegisterPackage<MyPackage>();
-                    }
+                        builder.Register<MyPackage>();
+                    },
                     cfg =>
                     {
                        cfg.Port = 1234;
@@ -158,7 +158,7 @@ Create, configure and register the classes that are marked with the GinetPackage
 ```
          var client = new NetworkClient("Chat", 
                    builder=>
-                        builder.RegisterPackages(Assembly.Load("Packages.Assembly.Name"));
+                        builder.RegisterPackages(Assembly.Load("Packages.Assembly.Name")),
                    cfg =>
                    {  
                       //client configuration
